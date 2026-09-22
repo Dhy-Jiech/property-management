@@ -1,0 +1,513 @@
+CREATE DATABASE property_management
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+use property_management;
+CREATE TABLE sinh_vien (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    ho_ten VARCHAR(100) NOT NULL,
+    ngay_sinh DATE,
+    gioi_tinh VARCHAR(20),
+    cccd VARCHAR(20) UNIQUE,
+    so_dien_thoai VARCHAR(20),
+    email VARCHAR(100),
+    dia_chi_que_quan VARCHAR(255),
+    truong VARCHAR(255),
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
+);
+CREATE TABLE tai_khoan (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    username VARCHAR(50) NOT NULL UNIQUE,
+
+    password_hash VARCHAR(255) NOT NULL,
+
+    vai_tro ENUM(
+        'ADMIN',
+        'QUAN_LY',
+        'NHAN_VIEN',
+        'SINH_VIEN'
+    ) NOT NULL,
+
+    trang_thai ENUM(
+        'HOAT_DONG',
+        'BI_KHOA'
+    ) NOT NULL DEFAULT 'HOAT_DONG',
+
+    sinh_vien_id BIGINT UNIQUE,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_tai_khoan_sinh_vien
+        FOREIGN KEY (sinh_vien_id)
+        REFERENCES sinh_vien(id)
+);
+CREATE TABLE khu (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    ma_khu VARCHAR(20) NOT NULL UNIQUE,
+
+    ten_khu VARCHAR(100) NOT NULL
+);
+CREATE TABLE toa (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    khu_id BIGINT NOT NULL,
+
+    ma_toa VARCHAR(20) NOT NULL UNIQUE,
+
+    ten_toa VARCHAR(100) NOT NULL,
+
+    CONSTRAINT fk_toa_khu
+        FOREIGN KEY (khu_id)
+        REFERENCES khu(id)
+);
+CREATE TABLE tang (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    toa_id BIGINT NOT NULL,
+
+    so_tang INT NOT NULL,
+
+    ten_tang VARCHAR(100),
+
+    CONSTRAINT fk_tang_toa
+        FOREIGN KEY (toa_id)
+        REFERENCES toa(id),
+
+    UNIQUE (toa_id, so_tang)
+);
+CREATE TABLE phong (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    tang_id BIGINT NOT NULL,
+
+    ma_phong VARCHAR(30) NOT NULL UNIQUE,
+
+    ten_phong VARCHAR(100),
+
+    loai_phong ENUM(
+        '4_NGUOI',
+        '6_NGUOI',
+        '8_NGUOI'
+    ) NOT NULL,
+
+    suc_chua INT NOT NULL,
+
+    so_nguoi_hien_tai INT NOT NULL DEFAULT 0,
+
+    gia_thang DECIMAL(15,2) NOT NULL,
+
+    trang_thai ENUM(
+        'TRONG',
+        'DANG_DAT_COC',
+        'DANG_CHO_THUE',
+        'BAO_TRI'
+    ) NOT NULL DEFAULT 'TRONG',
+
+    CONSTRAINT fk_phong_tang
+        FOREIGN KEY (tang_id)
+        REFERENCES tang(id),
+
+    CONSTRAINT chk_phong_suc_chua
+        CHECK (suc_chua IN (4, 6, 8)),
+
+    CONSTRAINT chk_phong_so_nguoi
+        CHECK (
+            so_nguoi_hien_tai >= 0
+            AND so_nguoi_hien_tai <= suc_chua
+        ),
+
+    CONSTRAINT chk_phong_gia
+        CHECK (gia_thang >= 0)
+);
+CREATE TABLE dang_ky_phong (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    sinh_vien_id BIGINT NOT NULL,
+
+    phong_id BIGINT NOT NULL,
+
+    loai_yeu_cau ENUM(
+        'DANG_KY',
+        'CHUYEN',
+        'HUY'
+    ) NOT NULL,
+
+    thoi_gian_dang_ky DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    trang_thai ENUM(
+        'CHO_DUYET',
+        'DA_DUYET',
+        'TU_CHOI',
+        'DA_HUY'
+    ) NOT NULL DEFAULT 'CHO_DUYET',
+
+    ly_do TEXT,
+
+    nguoi_duyet BIGINT,
+
+    thoi_gian_duyet DATETIME,
+
+    CONSTRAINT fk_dang_ky_sinh_vien
+        FOREIGN KEY (sinh_vien_id)
+        REFERENCES sinh_vien(id),
+
+    CONSTRAINT fk_dang_ky_phong
+        FOREIGN KEY (phong_id)
+        REFERENCES phong(id),
+
+    CONSTRAINT fk_dang_ky_nguoi_duyet
+        FOREIGN KEY (nguoi_duyet)
+        REFERENCES tai_khoan(id),
+
+    INDEX idx_dang_ky_trang_thai (trang_thai),
+
+    INDEX idx_dang_ky_sinh_vien (sinh_vien_id)
+);
+CREATE TABLE hop_dong (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    ma_hop_dong VARCHAR(50) NOT NULL UNIQUE,
+
+    sinh_vien_id BIGINT NOT NULL,
+
+    phong_id BIGINT NOT NULL,
+
+    ngay_bat_dau DATE NOT NULL,
+
+    ngay_ket_thuc DATE,
+
+    tien_phong DECIMAL(15,2) NOT NULL,
+
+    tien_dat_coc DECIMAL(15,2) NOT NULL DEFAULT 0,
+
+    trang_thai ENUM(
+        'CHO_HIEU_LUC',
+        'DANG_HIEU_LUC',
+        'HET_HAN',
+        'DA_CHAM_DUT'
+    ) NOT NULL DEFAULT 'CHO_HIEU_LUC',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_hop_dong_sinh_vien
+        FOREIGN KEY (sinh_vien_id)
+        REFERENCES sinh_vien(id),
+
+    CONSTRAINT fk_hop_dong_phong
+        FOREIGN KEY (phong_id)
+        REFERENCES phong(id),
+
+    CONSTRAINT chk_hop_dong_tien
+        CHECK (
+            tien_phong >= 0
+            AND tien_dat_coc >= 0
+        ),
+
+    INDEX idx_hop_dong_sinh_vien (sinh_vien_id),
+
+    INDEX idx_hop_dong_phong (phong_id),
+
+    INDEX idx_hop_dong_ngay_ket_thuc (ngay_ket_thuc)
+);
+CREATE TABLE lich_su_phong (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    sinh_vien_id BIGINT NOT NULL,
+
+    phong_cu BIGINT,
+
+    phong_moi BIGINT,
+
+    thoi_gian DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    ly_do TEXT,
+
+    nguoi_xu_ly BIGINT,
+
+    CONSTRAINT fk_lsp_sinh_vien
+        FOREIGN KEY (sinh_vien_id)
+        REFERENCES sinh_vien(id),
+
+    CONSTRAINT fk_lsp_phong_cu
+        FOREIGN KEY (phong_cu)
+        REFERENCES phong(id),
+
+    CONSTRAINT fk_lsp_phong_moi
+        FOREIGN KEY (phong_moi)
+        REFERENCES phong(id),
+
+    CONSTRAINT fk_lsp_nguoi_xu_ly
+        FOREIGN KEY (nguoi_xu_ly)
+        REFERENCES tai_khoan(id)
+);
+CREATE TABLE chi_so_dien (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    phong_id BIGINT NOT NULL,
+
+    ky_thang DATE NOT NULL,
+
+    chi_so_cu DECIMAL(15,3) NOT NULL DEFAULT 0,
+
+    chi_so_moi DECIMAL(15,3) NOT NULL,
+
+    don_gia DECIMAL(15,2) NOT NULL,
+
+    tien_dien DECIMAL(15,2) NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_dien_phong
+        FOREIGN KEY (phong_id)
+        REFERENCES phong(id),
+
+    CONSTRAINT chk_dien_chi_so
+        CHECK (chi_so_moi >= chi_so_cu),
+
+    UNIQUE (phong_id, ky_thang)
+);
+CREATE TABLE chi_so_nuoc (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    phong_id BIGINT NOT NULL,
+
+    ky_thang DATE NOT NULL,
+
+    chi_so_cu DECIMAL(15,3) NOT NULL DEFAULT 0,
+
+    chi_so_moi DECIMAL(15,3) NOT NULL,
+
+    don_gia DECIMAL(15,2) NOT NULL,
+
+    tien_nuoc DECIMAL(15,2) NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_nuoc_phong
+        FOREIGN KEY (phong_id)
+        REFERENCES phong(id),
+
+    CONSTRAINT chk_nuoc_chi_so
+        CHECK (chi_so_moi >= chi_so_cu),
+
+    UNIQUE (phong_id, ky_thang)
+);
+CREATE TABLE khoan_phi (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    ten_khoan_phi VARCHAR(100) NOT NULL,
+
+    don_gia DECIMAL(15,2) NOT NULL,
+
+    don_vi_tinh VARCHAR(50),
+
+    trang_thai ENUM(
+        'HOAT_DONG',
+        'NGUNG'
+    ) NOT NULL DEFAULT 'HOAT_DONG',
+
+    CONSTRAINT chk_khoan_phi_don_gia
+        CHECK (don_gia >= 0)
+);
+CREATE TABLE hoa_don (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    ma_hoa_don VARCHAR(50) NOT NULL UNIQUE,
+
+    sinh_vien_id BIGINT NOT NULL,
+
+    ky_thanh_toan DATE NOT NULL,
+
+    tien_phong DECIMAL(15,2) NOT NULL DEFAULT 0,
+
+    tien_dien DECIMAL(15,2) NOT NULL DEFAULT 0,
+
+    tien_nuoc DECIMAL(15,2) NOT NULL DEFAULT 0,
+
+    tong_phi DECIMAL(15,2) NOT NULL DEFAULT 0,
+
+    tong_tien DECIMAL(15,2) NOT NULL DEFAULT 0,
+
+    han_thanh_toan DATE NOT NULL,
+
+    so_lan_nhac INT NOT NULL DEFAULT 0,
+
+    trang_thai ENUM(
+        'CHUA_THANH_TOAN',
+        'DA_THANH_TOAN',
+        'QUA_HAN'
+    ) NOT NULL DEFAULT 'CHUA_THANH_TOAN',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_hoa_don_sinh_vien
+        FOREIGN KEY (sinh_vien_id)
+        REFERENCES sinh_vien(id),
+
+    INDEX idx_hoa_don_sinh_vien (sinh_vien_id),
+
+    INDEX idx_hoa_don_trang_thai (trang_thai),
+
+    INDEX idx_hoa_don_han_thanh_toan (han_thanh_toan)
+);
+CREATE TABLE khoan_phi_hoa_don (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    hoa_don_id BIGINT NOT NULL,
+
+    khoan_phi_id BIGINT NOT NULL,
+
+    so_luong DECIMAL(15,3) NOT NULL DEFAULT 1,
+
+    don_gia DECIMAL(15,2) NOT NULL,
+
+    thanh_tien DECIMAL(15,2) NOT NULL,
+
+    CONSTRAINT fk_kphd_hoa_don
+        FOREIGN KEY (hoa_don_id)
+        REFERENCES hoa_don(id),
+
+    CONSTRAINT fk_kphd_khoan_phi
+        FOREIGN KEY (khoan_phi_id)
+        REFERENCES khoan_phi(id)
+);
+CREATE TABLE thanh_toan (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    hoa_don_id BIGINT NOT NULL,
+
+    so_tien DECIMAL(15,2) NOT NULL,
+
+    phuong_thuc ENUM(
+        'TIEN_MAT',
+        'CHUYEN_KHOAN'
+    ) NOT NULL,
+
+    ma_giao_dich VARCHAR(100),
+
+    thoi_gian DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    nguoi_xac_nhan BIGINT,
+
+    CONSTRAINT fk_thanh_toan_hoa_don
+        FOREIGN KEY (hoa_don_id)
+        REFERENCES hoa_don(id),
+
+    CONSTRAINT fk_thanh_toan_nguoi_xac_nhan
+        FOREIGN KEY (nguoi_xac_nhan)
+        REFERENCES tai_khoan(id),
+
+    CONSTRAINT chk_thanh_toan_so_tien
+        CHECK (so_tien > 0)
+);
+CREATE TABLE tai_san (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    phong_id BIGINT NOT NULL,
+
+    ten_tai_san VARCHAR(150) NOT NULL,
+
+    so_luong INT NOT NULL DEFAULT 1,
+
+    tinh_trang VARCHAR(255),
+
+    CONSTRAINT fk_tai_san_phong
+        FOREIGN KEY (phong_id)
+        REFERENCES phong(id),
+
+    CONSTRAINT chk_tai_san_so_luong
+        CHECK (so_luong >= 0)
+);
+CREATE TABLE yeu_cau_sua_chua (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    sinh_vien_id BIGINT NOT NULL,
+
+    phong_id BIGINT NOT NULL,
+
+    tai_san_id BIGINT,
+
+    loai_yeu_cau ENUM(
+        'BAO_HONG',
+        'BAO_MAT',
+        'SUA_CHUA',
+        'KHAC'
+    ) NOT NULL,
+
+    noi_dung TEXT NOT NULL,
+
+    trang_thai ENUM(
+        'MOI',
+        'DANG_XU_LY',
+        'DA_XU_LY',
+        'TU_CHOI'
+    ) NOT NULL DEFAULT 'MOI',
+
+    phan_hoi TEXT,
+
+    thoi_gian DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_ycsc_sinh_vien
+        FOREIGN KEY (sinh_vien_id)
+        REFERENCES sinh_vien(id),
+
+    CONSTRAINT fk_ycsc_phong
+        FOREIGN KEY (phong_id)
+        REFERENCES phong(id),
+
+    CONSTRAINT fk_ycsc_tai_san
+        FOREIGN KEY (tai_san_id)
+        REFERENCES tai_san(id),
+
+    INDEX idx_ycsc_trang_thai (trang_thai)
+);
+CREATE TABLE thong_bao (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    nguoi_nhan_id BIGINT NOT NULL,
+
+    tieu_de VARCHAR(255) NOT NULL,
+
+    noi_dung TEXT NOT NULL,
+
+    loai VARCHAR(50),
+
+    da_doc BOOLEAN NOT NULL DEFAULT FALSE,
+
+    thoi_gian DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_thong_bao_nguoi_nhan
+        FOREIGN KEY (nguoi_nhan_id)
+        REFERENCES tai_khoan(id),
+
+    INDEX idx_thong_bao_nguoi_nhan (nguoi_nhan_id),
+
+    INDEX idx_thong_bao_da_doc (da_doc)
+);
+CREATE TABLE lich_su_nhac_no (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+
+    sinh_vien_id BIGINT NOT NULL,
+
+    hoa_don_id BIGINT NOT NULL,
+
+    lan_nhac INT NOT NULL,
+
+    noi_dung TEXT NOT NULL,
+
+    thoi_gian DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_nhac_no_sinh_vien
+        FOREIGN KEY (sinh_vien_id)
+        REFERENCES sinh_vien(id),
+
+    CONSTRAINT fk_nhac_no_hoa_don
+        FOREIGN KEY (hoa_don_id)
+        REFERENCES hoa_don(id),
+
+    INDEX idx_nhac_no_hoa_don (hoa_don_id)
+);
