@@ -314,7 +314,7 @@
             </li>
         </ul>
 
-        <% if (currentUser != null && currentUser.getVaiTro() == VaiTro.ADMIN) { %>
+        <% if (currentUser != null && (currentUser.getVaiTro() == VaiTro.ADMIN || currentUser.getVaiTro() == VaiTro.QUAN_LY)) { %>
         <div class="sidebar-section">Quản trị hệ thống</div>
         <ul class="nav flex-column">
             <li class="nav-item">

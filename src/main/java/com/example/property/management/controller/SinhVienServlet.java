@@ -41,6 +41,9 @@ public class SinhVienServlet extends HttpServlet {
                 case "edit":
                     showEditForm(request, response);
                     break;
+                case "createAccount":
+                    createAccountForStudent(request, response);
+                    break;
                 case "delete":
                     deleteSinhVien(request, response);
                     break;
@@ -74,9 +77,51 @@ public class SinhVienServlet extends HttpServlet {
     private void listSinhVien(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, Exception {
         List<SinhVien> list = sinhVienService.getAllSinhVien();
+        List<TaiKhoan> allAccounts = taiKhoanDAO.findAll();
+        java.util.Map<Long, TaiKhoan> accountMap = new java.util.HashMap<>();
+        if (allAccounts != null) {
+            for (TaiKhoan acc : allAccounts) {
+                if (acc.getSinhVienId() != null && acc.getSinhVienId() > 0) {
+                    accountMap.put(acc.getSinhVienId(), acc);
+                }
+            }
+        }
+
         request.setAttribute("sinhVienList", list);
+        request.setAttribute("accountMap", accountMap);
         request.setAttribute("pageTitle", "Danh Sách Sinh Viên");
         request.getRequestDispatcher("/views/sinhvien/sinhvien-list.jsp").forward(request, response);
+    }
+
+    private void createAccountForStudent(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, Exception {
+        int id = Integer.parseInt(request.getParameter("id"));
+        SinhVien sv = sinhVienService.getSinhVienById(id);
+        if (sv != null) {
+            String accUser = sv.getSoDienThoai();
+            if (accUser == null || accUser.isBlank()) {
+                accUser = sv.getCccd();
+            }
+            if (accUser == null || accUser.isBlank()) {
+                if (sv.getEmail() != null && !sv.getEmail().isBlank()) {
+                    accUser = sv.getEmail().split("@")[0];
+                } else {
+                    accUser = "sv" + sv.getId();
+                }
+            }
+            accUser = accUser.trim();
+
+            if (taiKhoanDAO.findByUsername(accUser) == null) {
+                TaiKhoan account = new TaiKhoan();
+                account.setUsername(accUser);
+                account.setPasswordHash("123456");
+                account.setVaiTro(VaiTro.SINH_VIEN);
+                account.setTrangThai(TrangThaiTaiKhoan.HOAT_DONG);
+                account.setSinhVienId((long) sv.getId());
+                taiKhoanDAO.insert(account);
+            }
+        }
+        response.sendRedirect(request.getContextPath() + "/sinhvien?message=AccountCreated");
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response)

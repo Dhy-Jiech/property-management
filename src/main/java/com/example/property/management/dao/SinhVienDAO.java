@@ -80,11 +80,55 @@ public class SinhVienDAO {
     }
 
     public boolean delete(int id) throws SQLException {
-        String sql = "DELETE FROM sinh_vien WHERE id = ?";
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            return stmt.executeUpdate() > 0;
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM tai_khoan WHERE sinh_vien_id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn
+                        .prepareStatement("DELETE FROM dang_ky_phong WHERE sinh_vien_id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn
+                        .prepareStatement("DELETE FROM yeu_cau_sua_chua WHERE sinh_vien_id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn
+                        .prepareStatement("DELETE FROM lich_su_phong WHERE sinh_vien_id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "DELETE FROM chi_tiet_hoa_don WHERE hoa_don_id IN (SELECT id FROM hoa_don WHERE sinh_vien_id = ?)")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM hoa_don WHERE sinh_vien_id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn
+                        .prepareStatement("DELETE FROM hop_dong WHERE sinh_vien_id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+
+                int affected;
+                try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM sinh_vien WHERE id = ?")) {
+                    stmt.setInt(1, id);
+                    affected = stmt.executeUpdate();
+                }
+
+                conn.commit();
+                return affected > 0;
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         }
     }
 

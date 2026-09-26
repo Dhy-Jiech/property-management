@@ -1,6 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="com.example.property.management.model.SinhVien" %>
+<%@ page import="com.example.property.management.model.TaiKhoan" %>
 <jsp:include page="/views/common/header.jsp">
     <jsp:param name="active" value="sinhvien" />
 </jsp:include>
@@ -31,15 +33,17 @@
                             <th>CCCD / CMND</th>
                             <th>Số điện thoại</th>
                             <th>Email</th>
-                            <th>Trường</th>
+                            <th>Tài Khoản</th>
                             <th class="text-end pe-3">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         <%
                             List<SinhVien> list = (List<SinhVien>) request.getAttribute("sinhVienList");
+                            Map<Long, TaiKhoan> accountMap = (Map<Long, TaiKhoan>) request.getAttribute("accountMap");
                             if (list != null && !list.isEmpty()) {
                                 for (SinhVien sv : list) {
+                                    TaiKhoan acc = (accountMap != null) ? accountMap.get((long) sv.getId()) : null;
                         %>
                         <tr>
                             <td class="ps-3 fw-bold"><%= sv.getId() %></td>
@@ -53,12 +57,22 @@
                             <td><%= sv.getCccd() != null ? sv.getCccd() : "-" %></td>
                             <td><%= sv.getSoDienThoai() != null ? sv.getSoDienThoai() : "-" %></td>
                             <td><%= sv.getEmail() != null ? sv.getEmail() : "-" %></td>
-                            <td><%= sv.getTruong() != null ? sv.getTruong() : "-" %></td>
+                            <td>
+                                <% if (acc != null) { %>
+                                    <span class="badge bg-success text-white">
+                                        <i class="fa-solid fa-user-check me-1"></i><%= acc.getUsername() %>
+                                    </span>
+                                <% } else { %>
+                                    <a href="${pageContext.request.contextPath}/sinhvien?action=createAccount&id=<%= sv.getId() %>" class="btn btn-sm btn-outline-success">
+                                        <i class="fa-solid fa-key me-1"></i>Cấp tài khoản
+                                    </a>
+                                <% } %>
+                            </td>
                             <td class="text-end pe-3">
                                 <a href="${pageContext.request.contextPath}/sinhvien?action=edit&id=<%= sv.getId() %>" class="btn btn-sm btn-outline-primary me-1">
                                     <i class="fa-solid fa-pen"></i>
                                 </a>
-                                <a href="${pageContext.request.contextPath}/sinhvien?action=delete&id=<%= sv.getId() %>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa sinh viên này?');">
+                                <a href="${pageContext.request.contextPath}/sinhvien?action=delete&id=<%= sv.getId() %>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa sinh viên này? Tất cả dữ liệu liên quan sẽ bị xóa sạch.');">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
                             </td>

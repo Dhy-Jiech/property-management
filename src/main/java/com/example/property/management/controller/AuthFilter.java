@@ -19,6 +19,9 @@ public class AuthFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+
         String path = request.getRequestURI().substring(request.getContextPath().length());
 
         // Allow static resources and public pages
@@ -55,9 +58,9 @@ public class AuthFilter implements Filter {
         if (role == VaiTro.ADMIN)
             return true;
 
-        // Account management: ADMIN only (already handled above)
+        // Account management: ADMIN, QUAN_LY
         if (path.startsWith("/taikhoan"))
-            return false;
+            return role == VaiTro.QUAN_LY;
 
         // Khu/Toa/Tang management: ADMIN, QUAN_LY
         if (path.startsWith("/khu")) {

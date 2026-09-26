@@ -6,9 +6,10 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
-    private static final String URL =
-            "jdbc:mysql://localhost:3306/property_management"
+    private static final String URL = "jdbc:mysql://localhost:3306/property_management"
             + "?useSSL=false"
+            + "&useUnicode=true"
+            + "&characterEncoding=UTF-8"
             + "&serverTimezone=Asia/Ho_Chi_Minh"
             + "&allowPublicKeyRetrieval=true";
 
