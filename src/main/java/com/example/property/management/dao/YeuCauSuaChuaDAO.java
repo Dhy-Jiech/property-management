@@ -56,6 +56,17 @@ public class YeuCauSuaChuaDAO {
         }
     }
 
+    public boolean updateResponse(int id, String phanHoi, TrangThaiSuaChua trangThai) throws SQLException {
+        String sql = "UPDATE yeu_cau_sua_chua SET phan_hoi = ?, trang_thai = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, phanHoi);
+            stmt.setString(2, trangThai.name());
+            stmt.setInt(3, id);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
     private YeuCauSuaChua mapResultSetToYeuCau(ResultSet rs) throws SQLException {
         YeuCauSuaChua y = new YeuCauSuaChua();
         y.setId(rs.getInt("id"));

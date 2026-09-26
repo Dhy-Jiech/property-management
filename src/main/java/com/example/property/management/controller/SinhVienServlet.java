@@ -1,6 +1,10 @@
 package com.example.property.management.controller;
 
+import com.example.property.management.dao.TaiKhoanDAO;
 import com.example.property.management.model.SinhVien;
+import com.example.property.management.model.TaiKhoan;
+import com.example.property.management.model.enums.TrangThaiTaiKhoan;
+import com.example.property.management.model.enums.VaiTro;
 import com.example.property.management.service.SinhVienService;
 
 import jakarta.servlet.ServletException;
@@ -14,10 +18,12 @@ import java.util.List;
 public class SinhVienServlet extends HttpServlet {
 
     private SinhVienService sinhVienService;
+    private TaiKhoanDAO taiKhoanDAO;
 
     @Override
     public void init() throws ServletException {
         this.sinhVienService = new SinhVienService();
+        this.taiKhoanDAO = new TaiKhoanDAO();
     }
 
     @Override
@@ -116,7 +122,41 @@ public class SinhVienServlet extends HttpServlet {
                 .truong(truong)
                 .build();
 
+        boolean isNew = (id == 0);
         sinhVienService.saveSinhVien(sv);
+
+        // If new student, auto-provision user account
+        if (isNew && "true".equals(request.getParameter("createAccount"))) {
+            String accUser = request.getParameter("accountUsername");
+            if (accUser == null || accUser.isBlank()) {
+                if (soDienThoai != null && !soDienThoai.isBlank()) {
+                    accUser = soDienThoai.trim();
+                } else if (cccd != null && !cccd.isBlank()) {
+                    accUser = cccd.trim();
+                } else if (email != null && !email.isBlank()) {
+                    accUser = email.split("@")[0];
+                } else {
+                    accUser = "sv" + sv.getId();
+                }
+            }
+
+            String accPass = request.getParameter("accountPassword");
+            if (accPass == null || accPass.isBlank()) {
+                accPass = "123456";
+            }
+
+            // Check if username exists already to avoid SQL conflict
+            if (taiKhoanDAO.findByUsername(accUser) == null) {
+                TaiKhoan account = new TaiKhoan();
+                account.setUsername(accUser);
+                account.setPasswordHash(accPass);
+                account.setVaiTro(VaiTro.SINH_VIEN);
+                account.setTrangThai(TrangThaiTaiKhoan.HOAT_DONG);
+                account.setSinhVienId((long) sv.getId());
+                taiKhoanDAO.insert(account);
+            }
+        }
+
         response.sendRedirect(request.getContextPath() + "/sinhvien?message=Saved");
     }
 

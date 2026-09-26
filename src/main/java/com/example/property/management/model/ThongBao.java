@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class ThongBao {
     private int id;
-    private int nguoiNhanId;
+    private Integer nguoiNhanId;
     private String tieuDe;
     private String noiDung;
     private String loai;
@@ -17,7 +17,7 @@ public class ThongBao {
     public ThongBao() {
     }
 
-    public ThongBao(int id, int nguoiNhanId, String tieuDe, String noiDung, String loai, Boolean daDoc,
+    public ThongBao(int id, Integer nguoiNhanId, String tieuDe, String noiDung, String loai, Boolean daDoc,
             LocalDateTime thoiGian, TaiKhoan nguoiNhan) {
         this.id = id;
         this.nguoiNhanId = nguoiNhanId;
@@ -37,11 +37,11 @@ public class ThongBao {
         this.id = id;
     }
 
-    public int getNguoiNhanId() {
+    public Integer getNguoiNhanId() {
         return nguoiNhanId;
     }
 
-    public void setNguoiNhanId(int nguoiNhanId) {
+    public void setNguoiNhanId(Integer nguoiNhanId) {
         this.nguoiNhanId = nguoiNhanId;
     }
 
@@ -99,7 +99,7 @@ public class ThongBao {
 
     public static class ThongBaoBuilder {
         private int id;
-        private int nguoiNhanId;
+        private Integer nguoiNhanId;
         private String tieuDe;
         private String noiDung;
         private String loai;
@@ -112,7 +112,7 @@ public class ThongBao {
             return this;
         }
 
-        public ThongBaoBuilder nguoiNhanId(int nguoiNhanId) {
+        public ThongBaoBuilder nguoiNhanId(Integer nguoiNhanId) {
             this.nguoiNhanId = nguoiNhanId;
             return this;
         }

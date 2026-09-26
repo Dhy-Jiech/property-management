@@ -1,6 +1,7 @@
 package com.example.property.management.controller;
 
 import com.example.property.management.model.TaiKhoan;
+import com.example.property.management.model.enums.VaiTro;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
@@ -20,9 +21,11 @@ public class AuthFilter implements Filter {
 
         String path = request.getRequestURI().substring(request.getContextPath().length());
 
-        // Allow static resources and public login page
+        // Allow static resources and public pages
         if (path.startsWith("/login") || path.startsWith("/css/") || path.startsWith("/js/")
-                || path.startsWith("/images/") || path.endsWith(".css") || path.endsWith(".js")) {
+                || path.startsWith("/images/") || path.startsWith("/assets/")
+                || path.endsWith(".css") || path.endsWith(".js") || path.endsWith(".png")
+                || path.endsWith(".jpg") || path.endsWith(".ico") || path.endsWith(".html")) {
             chain.doFilter(req, res);
             return;
         }
@@ -35,26 +38,66 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        // Role-based Access Control
-        boolean isAllowed = true;
-        if (path.startsWith("/taikhoan")) {
-            // Account management is strictly for ADMIN
-            if (user.getVaiTro() != com.example.property.management.model.enums.VaiTro.ADMIN) {
-                isAllowed = false;
-            }
-        } else if (path.startsWith("/dien-nuoc")) {
-            // Electricity & Water meter entry is for ADMIN, QUAN_LY, NHAN_VIEN
-            if (user.getVaiTro() == com.example.property.management.model.enums.VaiTro.SINH_VIEN) {
-                isAllowed = false;
-            }
-        }
+        VaiTro role = user.getVaiTro();
+        boolean allowed = checkAccess(path, role);
 
-        if (!isAllowed) {
+        if (!allowed) {
             request.getSession().setAttribute("errorMessage", "Bạn không có quyền truy cập chức năng này!");
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
         }
 
         chain.doFilter(req, res);
+    }
+
+    private boolean checkAccess(String path, VaiTro role) {
+        // ADMIN has access everywhere
+        if (role == VaiTro.ADMIN)
+            return true;
+
+        // Account management: ADMIN only (already handled above)
+        if (path.startsWith("/taikhoan"))
+            return false;
+
+        // Khu/Toa/Tang management: ADMIN, QUAN_LY
+        if (path.startsWith("/khu")) {
+            return role == VaiTro.QUAN_LY;
+        }
+
+        // Fee management: ADMIN, QUAN_LY
+        if (path.startsWith("/khoan-phi")) {
+            return role == VaiTro.QUAN_LY;
+        }
+
+        // Electricity & water entry: ADMIN, QUAN_LY, NHAN_VIEN
+        if (path.startsWith("/dien-nuoc")) {
+            return role == VaiTro.QUAN_LY || role == VaiTro.NHAN_VIEN;
+        }
+
+        // Contract management: ADMIN, QUAN_LY view/create; NHAN_VIEN view; SINH_VIEN
+        // view only
+        // (No further restriction needed here – handled by JSP role checks)
+
+        // SINH_VIEN restrictions: cannot access student list, cannot manage assets
+        // directly
+        if (role == VaiTro.SINH_VIEN) {
+            // Students cannot manage other students
+            if (path.startsWith("/sinhvien"))
+                return false;
+            // Students cannot access asset management page
+            if (path.startsWith("/taisan"))
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Heuristic: POST method or action=delete/insert/update implies write operation
+     */
+    private boolean isWriteOperation(String path) {
+        // We cannot easily check request method in this helper, so rely on action param
+        // check in servlet
+        return false; // conservative: allow, let servlet enforce
     }
 }

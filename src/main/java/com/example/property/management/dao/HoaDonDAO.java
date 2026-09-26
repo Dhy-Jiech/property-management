@@ -26,6 +26,24 @@ public class HoaDonDAO {
         return list;
     }
 
+    public List<HoaDon> findBySinhVienId(int svId) throws SQLException {
+        List<HoaDon> list = new ArrayList<>();
+        String sql = "SELECT h.*, sv.ho_ten as sv_ho_ten FROM hoa_don h " +
+                "LEFT JOIN sinh_vien sv ON h.sinh_vien_id = sv.id " +
+                "WHERE h.sinh_vien_id = ? " +
+                "ORDER BY h.id DESC";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, svId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToHoaDon(rs));
+                }
+            }
+        }
+        return list;
+    }
+
     public HoaDon findById(int id) throws SQLException {
         String sql = "SELECT h.*, sv.ho_ten as sv_ho_ten FROM hoa_don h " +
                 "LEFT JOIN sinh_vien sv ON h.sinh_vien_id = sv.id " +

@@ -52,12 +52,40 @@ public class DangKyPhongDAO {
         return false;
     }
 
+    public DangKyPhong findById(int id) throws SQLException {
+        String sql = "SELECT d.*, sv.ho_ten as sv_ho_ten, p.ma_phong, p.ten_phong " +
+                "FROM dang_ky_phong d " +
+                "LEFT JOIN sinh_vien sv ON d.sinh_vien_id = sv.id " +
+                "LEFT JOIN phong p ON d.phong_id = p.id " +
+                "WHERE d.id = ?";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next())
+                    return mapResultSetToDangKy(rs);
+            }
+        }
+        return null;
+    }
+
     public boolean updateStatus(int id, TrangThaiDangKy trangThai) throws SQLException {
         String sql = "UPDATE dang_ky_phong SET trang_thai = ? WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, trangThai.name());
             stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public boolean updateStatusWithApprover(int id, TrangThaiDangKy trangThai, String nguoiDuyet) throws SQLException {
+        String sql = "UPDATE dang_ky_phong SET trang_thai = ?, nguoi_duyet = ?, thoi_gian_duyet = NOW() WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, trangThai.name());
+            stmt.setString(2, nguoiDuyet);
+            stmt.setInt(3, id);
             return stmt.executeUpdate() > 0;
         }
     }

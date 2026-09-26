@@ -5,6 +5,10 @@ import com.example.property.management.model.enums.PhuongThucThanhToan;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Simplified ThanhToan model – nguoiXacNhan stored as username string
+ * to decouple from tai_khoan FK and simplify DAO queries.
+ */
 public class ThanhToan {
     private int id;
     private int hoaDonId;
@@ -12,26 +16,9 @@ public class ThanhToan {
     private PhuongThucThanhToan phuongThuc;
     private String maGiaoDich;
     private LocalDateTime thoiGian;
-    private int nguoiXacNhan;
-
-    // Joint objects
-    private HoaDon hoaDon;
-    private TaiKhoan taiKhoanNguoiXacNhan;
+    private String nguoiXacNhan; // username string
 
     public ThanhToan() {
-    }
-
-    public ThanhToan(int id, int hoaDonId, BigDecimal soTien, PhuongThucThanhToan phuongThuc, String maGiaoDich,
-            LocalDateTime thoiGian, int nguoiXacNhan, HoaDon hoaDon, TaiKhoan taiKhoanNguoiXacNhan) {
-        this.id = id;
-        this.hoaDonId = hoaDonId;
-        this.soTien = soTien;
-        this.phuongThuc = phuongThuc;
-        this.maGiaoDich = maGiaoDich;
-        this.thoiGian = thoiGian;
-        this.nguoiXacNhan = nguoiXacNhan;
-        this.hoaDon = hoaDon;
-        this.taiKhoanNguoiXacNhan = taiKhoanNguoiXacNhan;
     }
 
     public int getId() {
@@ -82,93 +69,11 @@ public class ThanhToan {
         this.thoiGian = thoiGian;
     }
 
-    public int getNguoiXacNhan() {
+    public String getNguoiXacNhan() {
         return nguoiXacNhan;
     }
 
-    public void setNguoiXacNhan(int nguoiXacNhan) {
+    public void setNguoiXacNhan(String nguoiXacNhan) {
         this.nguoiXacNhan = nguoiXacNhan;
-    }
-
-    public HoaDon getHoaDon() {
-        return hoaDon;
-    }
-
-    public void setHoaDon(HoaDon hoaDon) {
-        this.hoaDon = hoaDon;
-    }
-
-    public TaiKhoan getTaiKhoanNguoiXacNhan() {
-        return taiKhoanNguoiXacNhan;
-    }
-
-    public void setTaiKhoanNguoiXacNhan(TaiKhoan taiKhoanNguoiXacNhan) {
-        this.taiKhoanNguoiXacNhan = taiKhoanNguoiXacNhan;
-    }
-
-    public static ThanhToanBuilder builder() {
-        return new ThanhToanBuilder();
-    }
-
-    public static class ThanhToanBuilder {
-        private int id;
-        private int hoaDonId;
-        private BigDecimal soTien;
-        private PhuongThucThanhToan phuongThuc;
-        private String maGiaoDich;
-        private LocalDateTime thoiGian;
-        private int nguoiXacNhan;
-        private HoaDon hoaDon;
-        private TaiKhoan taiKhoanNguoiXacNhan;
-
-        public ThanhToanBuilder id(int id) {
-            this.id = id;
-            return this;
-        }
-
-        public ThanhToanBuilder hoaDonId(int hoaDonId) {
-            this.hoaDonId = hoaDonId;
-            return this;
-        }
-
-        public ThanhToanBuilder soTien(BigDecimal soTien) {
-            this.soTien = soTien;
-            return this;
-        }
-
-        public ThanhToanBuilder phuongThuc(PhuongThucThanhToan phuongThuc) {
-            this.phuongThuc = phuongThuc;
-            return this;
-        }
-
-        public ThanhToanBuilder maGiaoDich(String maGiaoDich) {
-            this.maGiaoDich = maGiaoDich;
-            return this;
-        }
-
-        public ThanhToanBuilder thoiGian(LocalDateTime thoiGian) {
-            this.thoiGian = thoiGian;
-            return this;
-        }
-
-        public ThanhToanBuilder nguoiXacNhan(int nguoiXacNhan) {
-            this.nguoiXacNhan = nguoiXacNhan;
-            return this;
-        }
-
-        public ThanhToanBuilder hoaDon(HoaDon hoaDon) {
-            this.hoaDon = hoaDon;
-            return this;
-        }
-
-        public ThanhToanBuilder taiKhoanNguoiXacNhan(TaiKhoan taiKhoanNguoiXacNhan) {
-            this.taiKhoanNguoiXacNhan = taiKhoanNguoiXacNhan;
-            return this;
-        }
-
-        public ThanhToan build() {
-            return new ThanhToan(id, hoaDonId, soTien, phuongThuc, maGiaoDich, thoiGian, nguoiXacNhan, hoaDon,
-                    taiKhoanNguoiXacNhan);
-        }
     }
 }

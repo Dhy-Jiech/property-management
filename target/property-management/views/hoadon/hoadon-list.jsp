@@ -1,22 +1,35 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.example.property.management.model.HoaDon" %>
+<%@ page import="com.example.property.management.model.TaiKhoan" %>
+<%@ page import="com.example.property.management.model.enums.VaiTro" %>
 <%@ page import="com.example.property.management.model.enums.TrangThaiHoaDon" %>
 <jsp:include page="/views/common/header.jsp">
     <jsp:param name="active" value="hoadon" />
 </jsp:include>
 
+<%
+    TaiKhoan u = (TaiKhoan) session.getAttribute("user");
+    boolean isSinhVien = (u != null && u.getVaiTro() == VaiTro.SINH_VIEN);
+%>
+
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="h3 text-dark fw-bold mb-0">Quản Lý Hóa Đơn & Điện Nước</h2>
-            <p class="text-muted small">Danh sách hóa đơn thanh toán hàng tháng của sinh viên.</p>
+            <h2 class="h3 text-dark fw-bold mb-0">
+                <%= isSinhVien ? "Hóa Đơn & Thanh Toán Của Tôi" : "Quản Lý Hóa Đơn & Điện Nước" %>
+            </h2>
+            <p class="text-muted small mb-0">
+                <%= isSinhVien ? "Danh sách các hóa đơn tiền phòng và chi phí điện nước của bạn." : "Danh sách hóa đơn thanh toán hàng tháng của sinh viên." %>
+            </p>
         </div>
-        <div>
-            <a href="${pageContext.request.contextPath}/hoadon?action=new" class="btn btn-primary">
-                <i class="fa-solid fa-file-invoice-dollar me-1"></i> Tạo Hóa Đơn Mới
-            </a>
-        </div>
+        <% if (!isSinhVien) { %>
+            <div>
+                <a href="${pageContext.request.contextPath}/hoadon?action=new" class="btn btn-primary">
+                    <i class="fa-solid fa-file-invoice-dollar me-1"></i> Tạo Hóa Đơn Mới
+                </a>
+            </div>
+        <% } %>
     </div>
 
     <div class="card border-0 shadow-sm">
@@ -28,7 +41,7 @@
                             <th class="ps-3">Mã HĐ</th>
                             <th>Sinh Viên</th>
                             <th>Kỳ thanh toán</th>
-                            <th>Tền phòng</th>
+                            <th>Tiền phòng</th>
                             <th>Tiền điện</th>
                             <th>Tiền nước</th>
                             <th>Phí dịch vụ</th>
@@ -61,11 +74,13 @@
                             </td>
                             <td class="text-end pe-3">
                                 <% if (hd.getTrangThai() == TrangThaiHoaDon.CHUA_THANH_TOAN) { %>
-                                    <a href="${pageContext.request.contextPath}/hoadon?action=pay&id=<%= hd.getId() %>" class="btn btn-sm btn-outline-success" onclick="return confirm('Xác nhận hóa đơn này đã được thanh toán?');">
-                                        <i class="fa-solid fa-check me-1"></i>Xác nhận thanh toán
+                                    <a href="${pageContext.request.contextPath}/hoadon?action=payDetail&id=<%= hd.getId() %>" class="btn btn-sm btn-outline-success">
+                                        <i class="fa-solid fa-credit-card me-1"></i>Thanh toán & Chi tiết
                                     </a>
                                 <% } else { %>
-                                    <span class="text-success small"><i class="fa-solid fa-circle-check me-1"></i>Đã xong</span>
+                                    <a href="${pageContext.request.contextPath}/hoadon?action=payDetail&id=<%= hd.getId() %>" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fa-solid fa-eye me-1"></i>Lịch sử GD
+                                    </a>
                                 <% } %>
                             </td>
                         </tr>

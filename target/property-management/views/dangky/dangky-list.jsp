@@ -1,18 +1,29 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ page import="com.example.property.management.model.TaiKhoan" %>
+<%@ page import="com.example.property.management.model.enums.VaiTro" %>
 
 <jsp:include page="/views/common/header.jsp">
     <jsp:param name="active" value="dangky" />
 </jsp:include>
 
+<%
+    TaiKhoan u = (TaiKhoan) session.getAttribute("user");
+    boolean isSinhVien = (u != null && u.getVaiTro() == VaiTro.SINH_VIEN);
+%>
+
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="h3 text-dark fw-bold mb-0">Quản Lý Đăng Ký & Đổi Phòng</h2>
-            <p class="text-muted small mb-0">Danh sách các đơn đăng ký nguyện vọng phòng ở và yêu cầu chuyển đổi phòng.</p>
+            <h2 class="h3 text-dark fw-bold mb-0">
+                <%= isSinhVien ? "Đăng Ký & Đổi Phòng Của Tôi" : "Quản Lý Đăng Ký & Đổi Phòng" %>
+            </h2>
+            <p class="text-muted small mb-0">
+                <%= isSinhVien ? "Theo dõi các đơn đăng ký ở ký túc xá và yêu cầu chuyển đổi phòng của bạn." : "Danh sách các đơn đăng ký nguyện vọng phòng ở và yêu cầu chuyển đổi phòng." %>
+            </p>
         </div>
         <a href="${pageContext.request.contextPath}/dangky?action=new" class="btn btn-primary">
-            <i class="fa-solid fa-plus me-1"></i> Tạo Đăng Ký Mới
+            <i class="fa-solid fa-plus me-1"></i> Tạo Đăng Ký / Đổi Phòng Mới
         </a>
     </div>
 
@@ -28,7 +39,9 @@
                             <th>Loại Yêu Cầu</th>
                             <th>Lý Do / Ghi Chú</th>
                             <th class="text-center">Trạng Thái</th>
-                            <th class="text-end pe-3">Phê Duyệt Admin</th>
+                            <c:if test="${sessionScope.user.vaiTro ne 'SINH_VIEN'}">
+                                <th class="text-end pe-3">Phê Duyệt Admin</th>
+                            </c:if>
                         </tr>
                     </thead>
                     <tbody>
@@ -65,19 +78,21 @@
                                         <c:otherwise><span class="badge bg-light text-dark">${d.trangThai}</span></c:otherwise>
                                     </c:choose>
                                 </td>
-                                <td class="text-end pe-3">
-                                    <c:if test="${d.trangThai == 'CHO_DUYET'}">
-                                        <a href="${pageContext.request.contextPath}/dangky?action=approve&id=${d.id}" class="btn btn-sm btn-outline-success me-1">
-                                            <i class="fa-solid fa-check me-1"></i>Duyệt
-                                        </a>
-                                        <a href="${pageContext.request.contextPath}/dangky?action=reject&id=${d.id}" class="btn btn-sm btn-outline-danger">
-                                            <i class="fa-solid fa-xmark me-1"></i>Từ chối
-                                        </a>
-                                    </c:if>
-                                    <c:if test="${d.trangThai != 'CHO_DUYET'}">
-                                        <span class="text-muted small">Đã xử lý</span>
-                                    </c:if>
-                                </td>
+                                <c:if test="${sessionScope.user.vaiTro ne 'SINH_VIEN'}">
+                                    <td class="text-end pe-3">
+                                        <c:if test="${d.trangThai == 'CHO_DUYET'}">
+                                            <a href="${pageContext.request.contextPath}/dangky?action=approve&id=${d.id}" class="btn btn-sm btn-outline-success me-1">
+                                                <i class="fa-solid fa-check me-1"></i>Duyệt
+                                            </a>
+                                            <a href="${pageContext.request.contextPath}/dangky?action=reject&id=${d.id}" class="btn btn-sm btn-outline-danger">
+                                                <i class="fa-solid fa-xmark me-1"></i>Từ chối
+                                            </a>
+                                        </c:if>
+                                        <c:if test="${d.trangThai != 'CHO_DUYET'}">
+                                            <span class="text-muted small">Đã xử lý</span>
+                                        </c:if>
+                                    </td>
+                                </c:if>
                             </tr>
                         </c:forEach>
                         
