@@ -38,7 +38,7 @@ public class HopDongDAO {
 
     public List<HopDong> findAll() throws SQLException {
         List<HopDong> list = new ArrayList<>();
-        String sql = "SELECT h.*, sv.ho_ten as sv_ho_ten, p.ma_phong, p.ten_phong " +
+        String sql = "SELECT h.*, sv.ho_ten as sv_ho_ten, p.ma_phong, p.ten_phong, p.gia_thang " +
                 "FROM hop_dong h " +
                 "LEFT JOIN sinh_vien sv ON h.sinh_vien_id = sv.id " +
                 "LEFT JOIN phong p ON h.phong_id = p.id " +
@@ -55,7 +55,7 @@ public class HopDongDAO {
 
     public List<HopDong> findBySinhVienId(int sinhVienId) throws SQLException {
         List<HopDong> list = new ArrayList<>();
-        String sql = "SELECT h.*, sv.ho_ten as sv_ho_ten, p.ma_phong, p.ten_phong " +
+        String sql = "SELECT h.*, sv.ho_ten as sv_ho_ten, p.ma_phong, p.ten_phong, p.gia_thang " +
                 "FROM hop_dong h " +
                 "LEFT JOIN sinh_vien sv ON h.sinh_vien_id = sv.id " +
                 "LEFT JOIN phong p ON h.phong_id = p.id " +
@@ -76,7 +76,7 @@ public class HopDongDAO {
     public HopDong findById(int id) throws SQLException {
         String sql = "SELECT h.*, sv.ho_ten as sv_ho_ten, sv.cccd as sv_cccd, sv.ngay_sinh as sv_ngay_sinh, sv.so_dien_thoai as sv_sdt, "
                 +
-                "p.ma_phong, p.ten_phong, p.gia_phong " +
+                "p.ma_phong, p.ten_phong, p.gia_thang " +
                 "FROM hop_dong h " +
                 "LEFT JOIN sinh_vien sv ON h.sinh_vien_id = sv.id " +
                 "LEFT JOIN phong p ON h.phong_id = p.id " +
@@ -213,8 +213,12 @@ public class HopDongDAO {
         p.setMaPhong(rs.getString("ma_phong"));
         p.setTenPhong(rs.getString("ten_phong"));
         try {
-            p.setGiaThang(rs.getBigDecimal("gia_phong"));
-        } catch (SQLException ignored) {
+            p.setGiaThang(rs.getBigDecimal("gia_thang"));
+        } catch (SQLException e) {
+            try {
+                p.setGiaThang(rs.getBigDecimal("gia_phong"));
+            } catch (SQLException ignored) {
+            }
         }
         h.setPhong(p);
 

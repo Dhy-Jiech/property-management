@@ -3,6 +3,8 @@
 <%@ page import="com.example.property.management.model.SinhVien" %>
 <%@ page import="com.example.property.management.model.Phong" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="com.example.property.management.model.TaiKhoan" %>
+<%@ page import="com.example.property.management.model.enums.VaiTro" %>
 <jsp:include page="/views/common/header.jsp">
     <jsp:param name="active" value="hopdong" />
 </jsp:include>
@@ -11,6 +13,9 @@
     HopDong hd = (HopDong) request.getAttribute("hopDong");
     SinhVien sv = (hd != null) ? hd.getSinhVien() : null;
     Phong p = (hd != null) ? hd.getPhong() : null;
+    
+    TaiKhoan user = (TaiKhoan) session.getAttribute("user");
+    boolean isSinhVien = (user != null && user.getVaiTro() == VaiTro.SINH_VIEN);
     
     DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     String ngayBDStr = (hd != null && hd.getNgayBatDau() != null) ? hd.getNgayBatDau().format(fmt) : "..../..../20....";
@@ -147,8 +152,8 @@
                     <div class="my-2" style="min-height: 120px;">
                         <img src="<%= hd.getChuKyBenB() %>" alt="Chữ ký Bên B" style="max-height: 100px; max-width: 100%;" />
                     </div>
-                    <p class="fw-bold text-success mb-0"><%= (sv != null) ? sv.getHoTen() : "" %></p>
-                <% } else { %>
+                    <p class="fw-bold text-success mb-0"><%= (sv != null && sv.getHoTen() != null) ? sv.getHoTen() : "" %></p>
+                <% } else if (isSinhVien) { %>
                     <!-- Digital Signature Canvas for Student -->
                     <form action="${pageContext.request.contextPath}/hopdong" method="post" id="signForm">
                         <input type="hidden" name="action" value="submitSign" />
@@ -168,6 +173,11 @@
                         </div>
                         <div class="text-danger small mt-1" id="errorMsg" style="display: none;">Vui lòng ký vào khung hình trên trước khi xác nhận!</div>
                     </form>
+                <% } else { %>
+                    <div class="my-3 p-3 bg-light text-muted border rounded">
+                        <i class="fa-solid fa-clock text-warning me-1"></i>
+                        <em>Chưa có chữ ký (Đang chờ sinh viên đăng nhập để ký hợp đồng)</em>
+                    </div>
                 <% } %>
             </div>
         </div>

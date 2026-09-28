@@ -117,4 +117,21 @@ public class DangKyPhongDAO {
         }
         return d;
     }
+
+    public boolean delete(int id) throws SQLException {
+        String sql = "DELETE FROM dang_ky_phong WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    public int deleteOldProcessedRequests() throws SQLException {
+        String sql = "DELETE FROM dang_ky_phong WHERE trang_thai IN ('TU_CHOI', 'DA_DUYET')";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            return stmt.executeUpdate();
+        }
+    }
 }

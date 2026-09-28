@@ -183,6 +183,14 @@ public class HopDongServlet extends HttpServlet {
 
     private void submitStudentSignature(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+        HttpSession session = request.getSession(false);
+        TaiKhoan user = (session != null) ? (TaiKhoan) session.getAttribute("user") : null;
+        if (user == null || user.getVaiTro() != VaiTro.SINH_VIEN) {
+            request.setAttribute("errorMessage", "Chỉ sinh viên mới có quyền ký hợp đồng Bên B!");
+            listHopDong(request, response);
+            return;
+        }
+
         int id = Integer.parseInt(request.getParameter("id"));
         String chuKyBenB = request.getParameter("chuKyBenB");
 

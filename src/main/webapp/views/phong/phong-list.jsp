@@ -49,11 +49,48 @@
         </div>
     </div>
 
+    <!-- Filter & Search Toolbar -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="searchPhongInput" class="form-control border-start-0" placeholder="Tìm tên phòng, mã phòng..." onkeyup="filterPhongTable()">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="filterLoaiPhong" class="form-select form-select-sm" onchange="filterPhongTable()">
+                        <option value="">-- Tất cả loại phòng --</option>
+                        <option value="4 người">Phòng 4 người</option>
+                        <option value="6 người">Phòng 6 người</option>
+                        <option value="8 người">Phòng 8 người</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="filterTrangThai" class="form-select form-select-sm" onchange="filterPhongTable()">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="Trống">Trống</option>
+                        <option value="Đang thuê">Đang thuê</option>
+                        <option value="Đã đầy">Đã đầy</option>
+                        <option value="Đặt cọc">Đặt cọc</option>
+                        <option value="Bảo trì">Bảo trì</option>
+                    </select>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" onclick="resetPhongFilter()">
+                        <i class="fa-solid fa-rotate-left me-1"></i>Đặt lại
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Table card -->
     <div class="card">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-modern align-middle mb-0">
+                <table class="table table-modern align-middle mb-0" id="phongTable">
                     <thead>
                         <tr>
                             <th class="ps-4 text-center" style="width:60px;">#</th>
@@ -71,7 +108,7 @@
                     </thead>
                     <tbody>
                         <c:forEach var="p" items="${listPhong}" varStatus="loop">
-                            <tr>
+                            <tr class="phong-row">
                                 <td class="ps-4 text-center text-muted fw-semibold">${loop.index + 1}</td>
 
                                 <td>
@@ -109,7 +146,7 @@
 
                                 <td class="text-center">
                                     <div class="capacity-cell">
-                                        <span class="cap-number ${p.soNguoiHienTai >= p.sucChua ? 'text-danger' : 'text-success'}">
+                                        <span class="cap-number ${p.soNguoiHienTai >= p.sucChua ? 'text-danger fw-bold' : 'text-success'}">
                                             ${p.soNguoiHienTai}
                                         </span>
                                         <span class="cap-sep">/</span>
@@ -123,7 +160,10 @@
 
                                 <td class="text-center">
                                     <c:choose>
-                                        <c:when test="${p.trangThai == 'TRONG'}">
+                                        <c:when test="${p.soNguoiHienTai >= p.sucChua}">
+                                            <span class="status-badge status-full"><span class="status-dot"></span>Đã đầy</span>
+                                        </c:when>
+                                        <c:when test="${p.trangThai == 'TRONG' || p.soNguoiHienTai == 0}">
                                             <span class="status-badge status-empty"><span class="status-dot"></span>Trống</span>
                                         </c:when>
                                         <c:when test="${p.trangThai == 'DANG_DAT_COC'}">
@@ -346,7 +386,36 @@
         font-size: 1rem;
         margin-bottom: 4px;
     }
-    .empty-sub { font-size: 0.85rem; }
+    .status-full        { background: #ffe4e6; color: #e11d48; }
 </style>
+
+<script>
+function filterPhongTable() {
+    const keyword = document.getElementById('searchPhongInput').value.toLowerCase().trim();
+    const loaiFilter = document.getElementById('filterLoaiPhong').value.toLowerCase();
+    const trangThaiFilter = document.getElementById('filterTrangThai').value.toLowerCase();
+    
+    const rows = document.querySelectorAll('.phong-row');
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const matchesKeyword = !keyword || text.includes(keyword);
+        const matchesLoai = !loaiFilter || text.includes(loaiFilter);
+        const matchesTrangThai = !trangThaiFilter || text.includes(trangThaiFilter);
+        
+        if (matchesKeyword && matchesLoai && matchesTrangThai) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function resetPhongFilter() {
+    document.getElementById('searchPhongInput').value = '';
+    document.getElementById('filterLoaiPhong').value = '';
+    document.getElementById('filterTrangThai').value = '';
+    filterPhongTable();
+}
+</script>
 
 <jsp:include page="/views/common/footer.jsp" />

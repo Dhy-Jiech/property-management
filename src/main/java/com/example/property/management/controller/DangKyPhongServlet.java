@@ -54,8 +54,11 @@ public class DangKyPhongServlet extends HttpServlet {
                 case "approve":
                     processApproval(request, response, TrangThaiDangKy.DA_DUYET);
                     break;
-                case "reject":
-                    processApproval(request, response, TrangThaiDangKy.TU_CHOI);
+                case "delete":
+                    deleteDangKy(request, response);
+                    break;
+                case "clearOld":
+                    clearOldDangKy(request, response);
                     break;
                 default:
                     listDangKy(request, response);
@@ -212,19 +215,46 @@ public class DangKyPhongServlet extends HttpServlet {
         }
     }
 
-    /** Increment or decrement so_nguoi_hien_tai based on request type */
+    private void deleteDangKy(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        int id = Integer.parseInt(request.getParameter("id"));
+        dangKyDAO.delete(id);
+        response.sendRedirect(request.getContextPath() + "/dangky?message=Deleted");
+    }
+
+    private void clearOldDangKy(HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        int count = dangKyDAO.deleteOldProcessedRequests();
+        response.sendRedirect(request.getContextPath() + "/dangky?message=ClearedOld&count=" + count);
+    }
+
+    /**
+     * Increment or decrement so_nguoi_hien_tai based on request type and sync
+     * trang_thai
+     */
     private void updatePhongSoNguoi(int phongId, LoaiYeuCauDangKy loai) {
-        String sql;
+        String sqlUpdateCount;
         if (loai == LoaiYeuCauDangKy.HUY_PHONG) {
-            sql = "UPDATE phong SET so_nguoi_hien_tai = GREATEST(0, so_nguoi_hien_tai - 1) WHERE id = ?";
+            sqlUpdateCount = "UPDATE phong SET so_nguoi_hien_tai = GREATEST(0, so_nguoi_hien_tai - 1) WHERE id = ?";
         } else {
             // DANG_KY_MOI or CHUYEN_PHONG
-            sql = "UPDATE phong SET so_nguoi_hien_tai = so_nguoi_hien_tai + 1 WHERE id = ? AND so_nguoi_hien_tai < suc_chua";
+            sqlUpdateCount = "UPDATE phong SET so_nguoi_hien_tai = so_nguoi_hien_tai + 1 WHERE id = ? AND so_nguoi_hien_tai < suc_chua";
         }
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, phongId);
-            stmt.executeUpdate();
+
+        String sqlSyncStatus = "UPDATE phong SET trang_thai = CASE " +
+                "WHEN so_nguoi_hien_tai = 0 THEN 'TRONG' " +
+                "ELSE 'DANG_CHO_THUE' END " +
+                "WHERE id = ? AND trang_thai != 'BAO_TRI' AND trang_thai != 'DANG_DAT_COC'";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sqlUpdateCount)) {
+                stmt.setInt(1, phongId);
+                stmt.executeUpdate();
+            }
+            try (PreparedStatement stmtSync = conn.prepareStatement(sqlSyncStatus)) {
+                stmtSync.setInt(1, phongId);
+                stmtSync.executeUpdate();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -28,10 +28,37 @@
         </div>
     </div>
 
+    <!-- Filter & Search Toolbar -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="searchHopDongInput" class="form-control border-start-0" placeholder="Tìm theo Mã HĐ, Sinh viên, Tên/Mã phòng..." onkeyup="filterHopDongTable()">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="filterTrangThaiHD" class="form-select form-select-sm" onchange="filterHopDongTable()">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="Chờ ký">Chờ ký hợp đồng</option>
+                        <option value="Đang hiệu lực">Đang hiệu lực</option>
+                        <option value="Đã chấm dứt">Đã chấm dứt</option>
+                    </select>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" onclick="resetHopDongFilter()">
+                        <i class="fa-solid fa-rotate-left me-1"></i>Đặt lại
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" id="hopDongTable">
                     <thead class="table-light">
                         <tr>
                             <th class="ps-3">Mã HĐ</th>
@@ -63,7 +90,7 @@
                                         statusText = "Đã chấm dứt";
                                     }
                         %>
-                        <tr>
+                        <tr class="hopdong-row">
                             <td class="ps-3 fw-bold text-primary"><%= hd.getMaHopDong() %></td>
                             <td><%= hd.getSinhVien() != null ? hd.getSinhVien().getHoTen() : ("SV ID: " + hd.getSinhVienId()) %></td>
                             <td><%= hd.getPhong() != null ? (hd.getPhong().getMaPhong() + " - " + hd.getPhong().getTenPhong()) : ("Phong ID: " + hd.getPhongId()) %></td>
@@ -78,12 +105,10 @@
                                 </span>
                             </td>
                             <td class="text-end pe-3">
-                                <% if (hd.getTrangThai() == TrangThaiHopDong.CHO_HIEU_LUC) { %>
-                                    <% if (isSinhVien || hd.getChuKyBenB() == null || hd.getChuKyBenB().isEmpty()) { %>
-                                        <a href="${pageContext.request.contextPath}/hopdong?action=sign&id=<%= hd.getId() %>" class="btn btn-sm btn-success me-1">
-                                            <i class="fa-solid fa-pen-nib me-1"></i>Ký Hợp Đồng
-                                        </a>
-                                    <% } %>
+                                <% if (isSinhVien && hd.getTrangThai() == TrangThaiHopDong.CHO_HIEU_LUC) { %>
+                                    <a href="${pageContext.request.contextPath}/hopdong?action=sign&id=<%= hd.getId() %>" class="btn btn-sm btn-success me-1">
+                                        <i class="fa-solid fa-pen-nib me-1"></i>Ký Hợp Đồng
+                                    </a>
                                 <% } %>
 
                                 <a href="${pageContext.request.contextPath}/hopdong?action=view&id=<%= hd.getId() %>" class="btn btn-sm btn-outline-info me-1">
@@ -114,5 +139,31 @@
         </div>
     </div>
 </div>
+
+<script>
+function filterHopDongTable() {
+    const keyword = document.getElementById('searchHopDongInput').value.toLowerCase().trim();
+    const trangThaiFilter = document.getElementById('filterTrangThaiHD').value.toLowerCase();
+    
+    const rows = document.querySelectorAll('.hopdong-row');
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const matchesKeyword = !keyword || text.includes(keyword);
+        const matchesTrangThai = !trangThaiFilter || text.includes(trangThaiFilter);
+        
+        if (matchesKeyword && matchesTrangThai) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function resetHopDongFilter() {
+    document.getElementById('searchHopDongInput').value = '';
+    document.getElementById('filterTrangThaiHD').value = '';
+    filterHopDongTable();
+}
+</script>
 
 <jsp:include page="/views/common/footer.jsp" />
