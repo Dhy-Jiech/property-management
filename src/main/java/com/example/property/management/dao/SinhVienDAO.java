@@ -102,11 +102,6 @@ public class SinhVienDAO {
                     stmt.setInt(1, id);
                     stmt.executeUpdate();
                 }
-                try (PreparedStatement stmt = conn.prepareStatement(
-                        "DELETE FROM chi_tiet_hoa_don WHERE hoa_don_id IN (SELECT id FROM hoa_don WHERE sinh_vien_id = ?)")) {
-                    stmt.setInt(1, id);
-                    stmt.executeUpdate();
-                }
                 try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM hoa_don WHERE sinh_vien_id = ?")) {
                     stmt.setInt(1, id);
                     stmt.executeUpdate();

@@ -66,7 +66,11 @@ public class LichSuPhongDAO {
             else
                 stmt.setNull(3, Types.INTEGER);
             stmt.setString(4, lsp.getLyDo());
-            stmt.setString(5, lsp.getNguoiXuLy());
+            if (lsp.getNguoiXuLy() != null && lsp.getNguoiXuLy().matches("\\d+")) {
+                stmt.setInt(5, Integer.parseInt(lsp.getNguoiXuLy()));
+            } else {
+                stmt.setString(5, lsp.getNguoiXuLy());
+            }
             stmt.executeUpdate();
         }
     }

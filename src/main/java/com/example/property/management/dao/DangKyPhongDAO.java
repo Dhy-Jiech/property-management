@@ -79,12 +79,12 @@ public class DangKyPhongDAO {
         }
     }
 
-    public boolean updateStatusWithApprover(int id, TrangThaiDangKy trangThai, String nguoiDuyet) throws SQLException {
+    public boolean updateStatusWithApprover(int id, TrangThaiDangKy trangThai, int nguoiDuyetId) throws SQLException {
         String sql = "UPDATE dang_ky_phong SET trang_thai = ?, nguoi_duyet = ?, thoi_gian_duyet = NOW() WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, trangThai.name());
-            stmt.setString(2, nguoiDuyet);
+            stmt.setInt(2, nguoiDuyetId);
             stmt.setInt(3, id);
             return stmt.executeUpdate() > 0;
         }

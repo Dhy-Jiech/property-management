@@ -166,12 +166,13 @@ public class DangKyPhongServlet extends HttpServlet {
             TrangThaiDangKy status) throws Exception {
         HttpSession session = request.getSession(false);
         TaiKhoan user = (session != null) ? (TaiKhoan) session.getAttribute("user") : null;
-        String nguoiDuyet = (user != null) ? user.getUsername() : "system";
+        int nguoiDuyetId = (user != null) ? user.getId() : 1;
+        String nguoiDuyetName = (user != null && user.getUsername() != null) ? user.getUsername() : "system";
 
         int id = Integer.parseInt(request.getParameter("id"));
         DangKyPhong dk = dangKyDAO.findById(id);
 
-        dangKyDAO.updateStatusWithApprover(id, status, nguoiDuyet);
+        dangKyDAO.updateStatusWithApprover(id, status, nguoiDuyetId);
 
         if (dk != null && status == TrangThaiDangKy.DA_DUYET) {
             // Update room occupancy count
@@ -180,12 +181,12 @@ public class DangKyPhongServlet extends HttpServlet {
             // Record room history
             LichSuPhong lsp = new LichSuPhong();
             lsp.setSinhVienId(dk.getSinhVienId());
-            if (dk.getLoaiYeuCau() == LoaiYeuCauDangKy.DOI_PHONG) {
+            if (dk.getLoaiYeuCau() == LoaiYeuCauDangKy.CHUYEN_PHONG) {
                 lsp.setPhongCu(null); // previous room can be tracked via history
             }
             lsp.setPhongMoi(dk.getPhongId());
             lsp.setLyDo(dk.getLyDo() != null ? dk.getLyDo() : dk.getLoaiYeuCau().name());
-            lsp.setNguoiXuLy(nguoiDuyet);
+            lsp.setNguoiXuLy(String.valueOf(nguoiDuyetId));
             lichSuPhongDAO.insert(lsp);
 
             // Send notification to student
@@ -193,7 +194,7 @@ public class DangKyPhongServlet extends HttpServlet {
                 ThongBao tb = new ThongBao();
                 tb.setNguoiNhanId(0); // 0 = broadcast to all; ThongBaoDAO handles NULL in SQL
                 tb.setTieuDe("Yêu cầu đăng ký phòng đã được duyệt");
-                tb.setNoiDung("Yêu cầu (ID: " + id + ") đã được chấp thuận bởi " + nguoiDuyet);
+                tb.setNoiDung("Yêu cầu (ID: " + id + ") đã được chấp thuận bởi " + nguoiDuyetName);
                 tb.setLoai("DUYET_PHONG");
                 thongBaoDAO.insert(tb);
             } catch (Exception e) {
@@ -201,16 +202,23 @@ public class DangKyPhongServlet extends HttpServlet {
             }
         }
 
-        response.sendRedirect(request.getContextPath() + "/dangky?message=Updated");
+        if (dk != null && status == TrangThaiDangKy.DA_DUYET &&
+                (dk.getLoaiYeuCau() == LoaiYeuCauDangKy.DANG_KY_MOI
+                        || dk.getLoaiYeuCau() == LoaiYeuCauDangKy.CHUYEN_PHONG)) {
+            response.sendRedirect(request.getContextPath() + "/hopdong?action=new&sinhVienId=" + dk.getSinhVienId()
+                    + "&phongId=" + dk.getPhongId() + "&message=ApprovedAndCreateContract");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/dangky?message=Updated");
+        }
     }
 
     /** Increment or decrement so_nguoi_hien_tai based on request type */
     private void updatePhongSoNguoi(int phongId, LoaiYeuCauDangKy loai) {
         String sql;
-        if (loai == LoaiYeuCauDangKy.TRA_PHONG) {
+        if (loai == LoaiYeuCauDangKy.HUY_PHONG) {
             sql = "UPDATE phong SET so_nguoi_hien_tai = GREATEST(0, so_nguoi_hien_tai - 1) WHERE id = ?";
         } else {
-            // DANG_KY_MOI or DOI_PHONG
+            // DANG_KY_MOI or CHUYEN_PHONG
             sql = "UPDATE phong SET so_nguoi_hien_tai = so_nguoi_hien_tai + 1 WHERE id = ? AND so_nguoi_hien_tai < suc_chua";
         }
         try (Connection conn = DBConnection.getConnection();

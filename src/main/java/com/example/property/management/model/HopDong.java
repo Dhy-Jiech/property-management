@@ -17,6 +17,9 @@ public class HopDong {
     private BigDecimal tienDatCoc;
     private TrangThaiHopDong trangThai;
     private LocalDateTime createdAt;
+    private String chuKyBenA; // Base64 data URL for Lessor/Manager signature
+    private String chuKyBenB; // Base64 data URL for Student signature
+    private LocalDateTime ngayKy;
 
     // Joint objects
     private SinhVien sinhVien;
@@ -27,7 +30,7 @@ public class HopDong {
 
     public HopDong(int id, String maHopDong, int sinhVienId, int phongId, LocalDate ngayBatDau, LocalDate ngayKetThuc,
             BigDecimal tienPhong, BigDecimal tienDatCoc, TrangThaiHopDong trangThai, LocalDateTime createdAt,
-            SinhVien sinhVien, Phong phong) {
+            String chuKyBenA, String chuKyBenB, LocalDateTime ngayKy, SinhVien sinhVien, Phong phong) {
         this.id = id;
         this.maHopDong = maHopDong;
         this.sinhVienId = sinhVienId;
@@ -38,6 +41,9 @@ public class HopDong {
         this.tienDatCoc = tienDatCoc;
         this.trangThai = trangThai;
         this.createdAt = createdAt;
+        this.chuKyBenA = chuKyBenA;
+        this.chuKyBenB = chuKyBenB;
+        this.ngayKy = ngayKy;
         this.sinhVien = sinhVien;
         this.phong = phong;
     }
@@ -138,6 +144,30 @@ public class HopDong {
         this.phong = phong;
     }
 
+    public String getChuKyBenA() {
+        return chuKyBenA;
+    }
+
+    public void setChuKyBenA(String chuKyBenA) {
+        this.chuKyBenA = chuKyBenA;
+    }
+
+    public String getChuKyBenB() {
+        return chuKyBenB;
+    }
+
+    public void setChuKyBenB(String chuKyBenB) {
+        this.chuKyBenB = chuKyBenB;
+    }
+
+    public LocalDateTime getNgayKy() {
+        return ngayKy;
+    }
+
+    public void setNgayKy(LocalDateTime ngayKy) {
+        this.ngayKy = ngayKy;
+    }
+
     public static HopDongBuilder builder() {
         return new HopDongBuilder();
     }
@@ -153,6 +183,9 @@ public class HopDong {
         private BigDecimal tienDatCoc;
         private TrangThaiHopDong trangThai;
         private LocalDateTime createdAt;
+        private String chuKyBenA;
+        private String chuKyBenB;
+        private LocalDateTime ngayKy;
         private SinhVien sinhVien;
         private Phong phong;
 
@@ -206,6 +239,21 @@ public class HopDong {
             return this;
         }
 
+        public HopDongBuilder chuKyBenA(String chuKyBenA) {
+            this.chuKyBenA = chuKyBenA;
+            return this;
+        }
+
+        public HopDongBuilder chuKyBenB(String chuKyBenB) {
+            this.chuKyBenB = chuKyBenB;
+            return this;
+        }
+
+        public HopDongBuilder ngayKy(LocalDateTime ngayKy) {
+            this.ngayKy = ngayKy;
+            return this;
+        }
+
         public HopDongBuilder sinhVien(SinhVien sinhVien) {
             this.sinhVien = sinhVien;
             return this;
@@ -218,7 +266,7 @@ public class HopDong {
 
         public HopDong build() {
             return new HopDong(id, maHopDong, sinhVienId, phongId, ngayBatDau, ngayKetThuc, tienPhong, tienDatCoc,
-                    trangThai, createdAt, sinhVien, phong);
+                    trangThai, createdAt, chuKyBenA, chuKyBenB, ngayKy, sinhVien, phong);
         }
     }
 }

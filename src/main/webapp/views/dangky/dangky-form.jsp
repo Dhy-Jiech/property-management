@@ -42,8 +42,8 @@
                         <label class="form-label fw-semibold">Loại Yêu Cầu <span class="text-danger">*</span></label>
                         <select name="loaiYeuCau" class="form-select" required>
                             <option value="DANG_KY_MOI">Đăng Ký Khởi Tạo Mới</option>
-                            <option value="DOI_PHONG">Yêu Cầu Chuyển Đổi Phòng</option>
-                            <option value="TRA_PHONG">Yêu Cầu Trả Phòng</option>
+                            <option value="CHUYEN_PHONG">Yêu Cầu Chuyển Đổi Phòng</option>
+                            <option value="HUY_PHONG">Yêu Cầu Trả / Hủy Phòng</option>
                         </select>
                     </div>
 

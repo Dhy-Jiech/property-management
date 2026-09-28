@@ -50,6 +50,17 @@ public class HopDongService {
         return inserted;
     }
 
+    public List<HopDong> getHopDongBySinhVienId(int sinhVienId) throws SQLException {
+        return hopDongDAO.findBySinhVienId(sinhVienId);
+    }
+
+    public boolean signHopDongByStudent(int id, String chuKyBenB) throws SQLException {
+        if (chuKyBenB == null || chuKyBenB.trim().isEmpty()) {
+            throw new IllegalArgumentException("Chữ ký sinh viên không được để trống!");
+        }
+        return hopDongDAO.updateStudentSignature(id, chuKyBenB);
+    }
+
     public boolean cancelHopDong(int id) throws SQLException {
         HopDong hd = hopDongDAO.findById(id);
         if (hd != null && hd.getTrangThai() == TrangThaiHopDong.DANG_HIEU_LUC) {
