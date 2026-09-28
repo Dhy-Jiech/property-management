@@ -352,6 +352,14 @@
 
         <div class="sidebar-section">Ký túc xá</div>
         <ul class="nav flex-column">
+            <% if (currentUser != null && currentUser.getVaiTro() == VaiTro.SINH_VIEN) { %>
+                <li class="nav-item">
+                    <a class="nav-link <%= "phongcuatoi".equals(active) ? "active" : "" %>" href="${pageContext.request.contextPath}/phong?action=mine">
+                        <i class="fa-solid fa-house-user nav-icon"></i> Phòng của tôi
+                    </a>
+                </li>
+                <% } %>
+
             <li class="nav-item">
                 <a class="nav-link <%= "phong".equals(active) ? "active" : "" %>" href="${pageContext.request.contextPath}/phong">
                     <i class="fa-solid fa-door-open nav-icon"></i>

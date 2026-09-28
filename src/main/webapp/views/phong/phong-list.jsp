@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<c:set var="isSV" value="${sessionScope.user.vaiTro eq 'SINH_VIEN'}" />
 
 <jsp:include page="/views/common/header.jsp">
     <jsp:param name="active" value="phong" />
@@ -27,27 +28,28 @@
 
     <!-- Summary chips -->
     <div class="d-flex flex-wrap gap-2 mb-4">
-        <div class="summary-chip">
-            <span class="chip-dot" style="background: var(--primary);"></span>
-            Tổng: <strong>${listPhong.size()}</strong>
-        </div>
-        <div class="summary-chip">
-            <span class="chip-dot" style="background: var(--success);"></span>
-            Trống
-        </div>
-        <div class="summary-chip">
-            <span class="chip-dot" style="background: var(--primary);"></span>
-            Đang thuê
-        </div>
-        <div class="summary-chip">
-            <span class="chip-dot" style="background: var(--warning);"></span>
-            Đặt cọc
-        </div>
-        <div class="summary-chip">
-            <span class="chip-dot" style="background: var(--danger);"></span>
-            Bảo trì
-        </div>
+    <div class="summary-chip">
+        <span class="chip-dot" style="background: var(--primary);"></span>
+        Tổng: <strong>${listPhong.size()}</strong>
     </div>
+    <div class="summary-chip">
+        <span class="chip-dot" style="background: var(--success);"></span>Trống
+    </div>
+    <div class="summary-chip">
+        <span class="chip-dot" style="background: #0e7490;"></span>Còn chỗ
+    </div>
+    <div class="summary-chip">
+        <span class="chip-dot" style="background: #e11d48;"></span>Đã đầy
+    </div>
+    <div class="summary-chip">
+        <span class="chip-dot" style="background: var(--danger);"></span>Bảo trì
+    </div>
+    <c:if test="${isSV}">
+        <div class="summary-chip">
+            <span class="chip-dot" style="background: #4338ca;"></span>Đang thuê (phòng của bạn)
+        </div>
+    </c:if>
+</div>
 
     <!-- Filter & Search Toolbar -->
     <div class="card mb-4 border-0 shadow-sm">
@@ -71,10 +73,12 @@
                     <select id="filterTrangThai" class="form-select form-select-sm" onchange="filterPhongTable()">
                         <option value="">-- Tất cả trạng thái --</option>
                         <option value="Trống">Trống</option>
-                        <option value="Đang thuê">Đang thuê</option>
+                        <option value="Còn chỗ">Còn chỗ</option>
                         <option value="Đã đầy">Đã đầy</option>
-                        <option value="Đặt cọc">Đặt cọc</option>
                         <option value="Bảo trì">Bảo trì</option>
+                        <c:if test="${isSV}">
+                            <option value="Đang thuê">Đang thuê</option>
+                        </c:if>
                     </select>
                 </div>
                 <div class="col-md-2 text-end">
@@ -159,22 +163,24 @@
                                 </td>
 
                                 <td class="text-center">
+                                    <c:set var="isMine" value="${isSV and myPhongIds.contains(p.id)}" />
                                     <c:choose>
-                                        <c:when test="${p.soNguoiHienTai >= p.sucChua}">
-                                            <span class="status-badge status-full"><span class="status-dot"></span>Đã đầy</span>
-                                        </c:when>
-                                        <c:when test="${p.trangThai == 'TRONG' || p.soNguoiHienTai == 0}">
-                                            <span class="status-badge status-empty"><span class="status-dot"></span>Trống</span>
-                                        </c:when>
-                                        <c:when test="${p.trangThai == 'DANG_DAT_COC'}">
-                                            <span class="status-badge status-deposit"><span class="status-dot"></span>Đặt cọc</span>
-                                        </c:when>
-                                        <c:when test="${p.trangThai == 'DANG_CHO_THUE'}">
+                                        <%-- Chỉ sinh viên mới thấy, và chỉ ở đúng phòng của mình --%>
+                                        <c:when test="${isMine}">
                                             <span class="status-badge status-rented"><span class="status-dot"></span>Đang thuê</span>
                                         </c:when>
                                         <c:when test="${p.trangThai == 'BAO_TRI'}">
                                             <span class="status-badge status-maintenance"><span class="status-dot"></span>Bảo trì</span>
                                         </c:when>
+                                        <c:when test="${p.soNguoiHienTai >= p.sucChua}">
+                                            <span class="status-badge status-full"><span class="status-dot"></span>Đã đầy</span>
+                                        </c:when>
+                                        <c:when test="${p.soNguoiHienTai == 0}">
+                                            <span class="status-badge status-empty"><span class="status-dot"></span>Trống</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="status-badge status-available"><span class="status-dot"></span>Còn chỗ</span>
+                                        </c:otherwise>
                                     </c:choose>
                                 </td>
 
@@ -219,6 +225,7 @@
 </div>
 
 <style>
+    .status-available { background: #cffafe; color: #0e7490; }
     /* Summary chips */
     .summary-chip {
         display: inline-flex;
