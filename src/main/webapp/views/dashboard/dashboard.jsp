@@ -41,9 +41,16 @@
                             Phòng hiện tại
                         </div>
                         <h3 class="fw-bold mb-1 mt-2 text-primary" style="font-size: 1.5rem;">${svRoomName}</h3>
-                        <span class="badge bg-primary-subtle text-primary">
-                            <i class="fa-solid fa-bed me-1"></i> Đang lưu trú
-                        </span>
+                        <c:choose>
+                            <c:when test="${svHasRoom}">
+                                <span class="badge bg-primary-subtle text-primary">
+                                    <i class="fa-solid fa-bed me-1"></i> Đang lưu trú
+                                </span>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="badge bg-secondary-subtle text-secondary">Chưa có hợp đồng hiệu lực</span>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                     <div class="stat-icon" style="background: linear-gradient(135deg, #eef2ff, #e0e7ff); color: var(--primary);">
                         <i class="fa-solid fa-door-closed"></i>

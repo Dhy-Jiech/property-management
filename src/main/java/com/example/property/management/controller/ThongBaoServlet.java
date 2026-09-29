@@ -10,6 +10,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @WebServlet(name = "ThongBaoServlet", urlPatterns = { "/thong-bao" })
 public class ThongBaoServlet extends HttpServlet {
@@ -145,4 +147,5 @@ public class ThongBaoServlet extends HttpServlet {
         request.setAttribute("pageTitle", "Thông Báo");
         request.getRequestDispatcher("/views/thongbao/thongbao-list.jsp").forward(request, response);
     }
+    
 }
