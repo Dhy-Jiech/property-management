@@ -250,3 +250,14 @@ VALUES
 (1, 1, 'Giường tầng', 2, 'Tốt'),
 (2, 1, 'Bàn học', 4, 'Tốt'),
 (3, 1, 'Quạt trần', 1, 'Tốt');
+
+ALTER TABLE thong_bao
+  ADD COLUMN pham_vi ENUM('TAT_CA','PHONG','CA_NHAN') NOT NULL DEFAULT 'TAT_CA',
+  ADD COLUMN phong_id BIGINT NULL,
+  ADD COLUMN nguoi_gui_id INT NULL,
+  ADD CONSTRAINT fk_tb_phong FOREIGN KEY (phong_id) REFERENCES phong(id) ON DELETE CASCADE;
+  
+UPDATE thong_bao 
+SET pham_vi = IF(nguoi_nhan_id IS NULL, 'TAT_CA', 'CA_NHAN')
+WHERE id > 0;
+

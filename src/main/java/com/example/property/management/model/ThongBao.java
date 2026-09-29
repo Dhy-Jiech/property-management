@@ -1,5 +1,6 @@
 package com.example.property.management.model;
 
+import com.example.property.management.model.enums.LoaiPhamVi;
 import java.time.LocalDateTime;
 
 public class ThongBao {
@@ -10,6 +11,12 @@ public class ThongBao {
     private String loai;
     private Boolean daDoc;
     private LocalDateTime thoiGian;
+    private LoaiPhamVi phamVi; // TAT_CA / PHONG / CA_NHAN
+    private Integer phongId;
+    private Integer nguoiGuiId;
+    // Chỉ để hiển thị, không lưu DB
+    private String maPhong;
+    private String tenNguoiNhan;
 
     // Joint object
     private TaiKhoan nguoiNhan;
@@ -91,6 +98,51 @@ public class ThongBao {
 
     public void setNguoiNhan(TaiKhoan nguoiNhan) {
         this.nguoiNhan = nguoiNhan;
+    }
+
+    // Getter & Setter cho phamVi
+    public LoaiPhamVi getPhamVi() {
+        return phamVi;
+    }
+
+    public void setPhamVi(LoaiPhamVi phamVi) {
+        this.phamVi = phamVi;
+    }
+
+    // Getter & Setter cho phongId
+    public Integer getPhongId() {
+        return phongId;
+    }
+
+    public void setPhongId(Integer phongId) {
+        this.phongId = phongId;
+    }
+
+    // Getter & Setter cho nguoiGuiId
+    public Integer getNguoiGuiId() {
+        return nguoiGuiId;
+    }
+
+    public void setNguoiGuiId(Integer nguoiGuiId) {
+        this.nguoiGuiId = nguoiGuiId;
+    }
+
+    // Getter & Setter cho maPhong
+    public String getMaPhong() {
+        return maPhong;
+    }
+
+    public void setMaPhong(String maPhong) {
+        this.maPhong = maPhong;
+    }
+
+    // Getter & Setter cho tenNguoiNhan
+    public String getTenNguoiNhan() {
+        return tenNguoiNhan;
+    }
+
+    public void setTenNguoiNhan(String tenNguoiNhan) {
+        this.tenNguoiNhan = tenNguoiNhan;
     }
 
     public static ThongBaoBuilder builder() {
