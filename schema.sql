@@ -261,3 +261,16 @@ UPDATE thong_bao
 SET pham_vi = IF(nguoi_nhan_id IS NULL, 'TAT_CA', 'CA_NHAN')
 WHERE id > 0;
 
+ALTER TABLE hoa_don MODIFY sinh_vien_id bigINT NULL;
+ALTER TABLE hoa_don add phong_id bigint;
+ALTER TABLE hoa_don ADD CONSTRAINT fk_hd_phong
+    FOREIGN KEY (phong_id) REFERENCES phong(id) ON DELETE CASCADE;
+
+CREATE TABLE IF NOT EXISTS hoa_don_chi_tiet (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    hoa_don_id bigINT NOT NULL,
+    ten_khoan_phi VARCHAR(100) NOT NULL,
+    don_vi_tinh VARCHAR(20),
+    thanh_tien DECIMAL(12,2) NOT NULL,
+    FOREIGN KEY (hoa_don_id) REFERENCES hoa_don(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -27,14 +27,12 @@ public class DashboardServlet extends HttpServlet {
             // Lấy id sinh viên qua tai_khoan.sinh_vien_id (theo schema thật)
             int svId = countQuery("SELECT COALESCE(sinh_vien_id, 0) FROM tai_khoan WHERE id = ?", user.getId());
 
-            int svUnpaidCount = countQuery(
-                    "SELECT COUNT(*) FROM hoa_don WHERE sinh_vien_id = ? " +
-                            "AND trang_thai IN ('CHUA_THANH_TOAN','QUAN_HAN')",
-                    svId);
-            String svDebt = scalarQuery(
-                    "SELECT COALESCE(SUM(tong_tien),0) FROM hoa_don WHERE sinh_vien_id = ? " +
-                            "AND trang_thai IN ('CHUA_THANH_TOAN','QUAN_HAN')",
-                    svId);
+            String debtCond = " FROM hoa_don h WHERE h.trang_thai IN ('CHUA_THANH_TOAN','QUAN_HAN') AND " +
+                    "(h.phong_id IN (SELECT hd.phong_id FROM hop_dong hd WHERE hd.sinh_vien_id = ? AND hd.trang_thai = 'DANG_HIEU_LUC') "
+                    +
+                    " OR h.sinh_vien_id = ?)";
+            int svUnpaidCount = countQuery("SELECT COUNT(*)" + debtCond, svId, svId);
+            String svDebt = scalarQuery("SELECT COALESCE(SUM(h.tong_tien),0)" + debtCond, svId, svId);
 
             int svUnreadNotify = 0;
             try {

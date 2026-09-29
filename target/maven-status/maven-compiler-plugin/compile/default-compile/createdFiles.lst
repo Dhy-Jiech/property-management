@@ -38,7 +38,6 @@ com\example\property\management\model\SinhVien$SinhVienBuilder.class
 com\example\property\management\controller\AuthFilter.class
 com\example\property\management\model\enums\PhuongThucThanhToan.class
 com\example\property\management\dao\TaiSanDAO.class
-com\example\property\management\controller\DashboardServlet.class
 com\example\property\management\dao\HoaDonDAO.class
 com\example\property\management\dao\KhuDAO.class
 com\example\property\management\model\DangKyPhong.class

@@ -57,6 +57,7 @@ D:\User\Admin\Documents\NetBeansProjects\property-management\src\main\java\com\e
 D:\User\Admin\Documents\NetBeansProjects\property-management\src\main\java\com\example\property\management\dao\YeuCauSuaChuaDAO.java
 D:\User\Admin\Documents\NetBeansProjects\property-management\src\main\java\com\example\property\management\model\DangKyPhong.java
 D:\User\Admin\Documents\NetBeansProjects\property-management\src\main\java\com\example\property\management\dao\HoaDonDAO.java
+D:\User\Admin\Documents\NetBeansProjects\property-management\src\main\java\com\example\property\management\service\HoaDonRoomService.java
 D:\User\Admin\Documents\NetBeansProjects\property-management\src\main\java\com\example\property\management\model\ThongBao.java
 D:\User\Admin\Documents\NetBeansProjects\property-management\src\main\java\com\example\property\management\service\SinhVienService.java
 D:\User\Admin\Documents\NetBeansProjects\property-management\src\main\java\com\example\property\management\model\LichSuNhacNo.java
