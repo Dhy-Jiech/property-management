@@ -52,6 +52,30 @@
     </div>
 </div>
 
+<!-- Reusable Custom Flat Warm-Gray Confirmation Modal -->
+<div class="modal fade" id="appConfirmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content border shadow-sm" style="border-radius: 4px; background: #FFFFFF; border-color: #E2E0D8 !important;">
+            <div class="modal-header border-bottom py-2.5 px-3" style="background: #F5F4F0;">
+                <h6 class="modal-title mb-0 font-sans fw-semibold d-flex align-items-center" id="appConfirmTitle">
+                    <i class="ph ph-warning-circle me-2 text-danger fs-5" id="appConfirmIcon"></i>
+                    <span id="appConfirmTitleText">Xác nhận thao tác</span>
+                </h6>
+                <button type="button" class="btn-close py-2" data-bs-dismiss="modal" aria-label="Close" style="font-size: 10px;"></button>
+            </div>
+            <div class="modal-body p-3 text-dark" style="font-size: 13.5px; line-height: 1.5;" id="appConfirmBody">
+                Bạn có chắc chắn muốn thực hiện thao tác này?
+            </div>
+            <div class="modal-footer border-top py-2 px-3 gap-2" style="background: #F5F4F0;">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-sm btn-danger" id="appConfirmSubmitBtn">
+                    <i class="ph ph-check me-1"></i> Đồng ý
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer class="text-muted text-center py-2" style="border-top: 1px solid #E2E0D8; background-color: #F5F4F0; font-size: 12px;">
     <div class="container">
         <span>&copy; 2026 Dormitory Property Management System. Built with Jakarta EE.</span>
@@ -101,6 +125,120 @@
             });
         });
     }
+
+    // ==========================================
+    // Custom Flat Confirmation Modal System
+    // ==========================================
+    const confirmModalEl = document.getElementById('appConfirmModal');
+    let appConfirmBsModal = null;
+    let confirmCallback = null;
+
+    if (confirmModalEl) {
+        appConfirmBsModal = new bootstrap.Modal(confirmModalEl);
+    }
+
+    /**
+     * Display Custom Flat Confirmation Dialog
+     * @param {Object} opts { title, message, btnText, btnClass, iconClass, onConfirm }
+     */
+    window.showAppConfirm = function(opts) {
+        if (!appConfirmBsModal) return;
+        
+        const titleText = opts.title || 'Xác nhận thao tác';
+        const bodyText = opts.message || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
+        const btnText = opts.btnText || 'Xác nhận';
+        const btnClass = opts.btnClass || 'btn-danger';
+        const iconClass = opts.iconClass || 'ph ph-warning-circle text-danger';
+
+        document.getElementById('appConfirmTitleText').innerText = titleText;
+        document.getElementById('appConfirmBody').innerText = bodyText;
+        
+        const iconEl = document.getElementById('appConfirmIcon');
+        if (iconEl) {
+            iconEl.className = iconClass + ' me-2 fs-5';
+        }
+
+        const submitBtn = document.getElementById('appConfirmSubmitBtn');
+        if (submitBtn) {
+            submitBtn.className = 'btn btn-sm ' + btnClass;
+            submitBtn.innerHTML = '<i class="ph ph-check me-1"></i> ' + btnText;
+        }
+
+        confirmCallback = opts.onConfirm || null;
+        appConfirmBsModal.show();
+    };
+
+    const confirmSubmitBtn = document.getElementById('appConfirmSubmitBtn');
+    if (confirmSubmitBtn) {
+        confirmSubmitBtn.addEventListener('click', function() {
+            if (appConfirmBsModal) {
+                appConfirmBsModal.hide();
+            }
+            if (typeof confirmCallback === 'function') {
+                const cb = confirmCallback;
+                confirmCallback = null;
+                cb();
+            }
+        });
+    }
+
+    // Intercept clicks on links or forms with legacy confirm() or data-confirm
+    document.addEventListener('click', function(e) {
+        const target = e.target.closest('a[data-confirm], button[data-confirm], a[onclick*="confirm"], button[onclick*="confirm"]');
+        if (!target) return;
+
+        // Extract confirm message
+        let confirmMsg = target.getAttribute('data-confirm');
+        let onclickAttr = target.getAttribute('onclick');
+
+        if (!confirmMsg && onclickAttr && onclickAttr.includes('confirm(')) {
+            const match = onclickAttr.match(/confirm\(['"](.*?)['"]\)/);
+            if (match && match[1]) {
+                confirmMsg = match[1];
+            }
+        }
+
+        if (confirmMsg) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const isDelete = confirmMsg.toLowerCase().includes('xóa');
+            const isLock = confirmMsg.toLowerCase().includes('khóa');
+            
+            let title = 'Xác Nhận Thao Tác';
+            let btnText = 'Đồng Ý';
+            let btnClass = 'btn-primary';
+            let iconClass = 'ph ph-question text-primary';
+
+            if (isDelete) {
+                title = 'Xác Nhận Xóa Dữ Liệu';
+                btnText = 'Xóa Ngay';
+                btnClass = 'btn-danger';
+                iconClass = 'ph ph-trash text-danger';
+            } else if (isLock) {
+                title = 'Xác Nhận Thay Đổi Trạng Thái';
+                btnText = 'Thực Hiện';
+                btnClass = 'btn-warning';
+                iconClass = 'ph ph-lock text-warning';
+            }
+
+            window.showAppConfirm({
+                title: title,
+                message: confirmMsg,
+                btnText: btnText,
+                btnClass: btnClass,
+                iconClass: iconClass,
+                onConfirm: function() {
+                    if (target.tagName.toLowerCase() === 'a') {
+                        window.location.href = target.href;
+                    } else if (target.form) {
+                        target.form.submit();
+                    }
+                }
+            });
+            return false;
+        }
+    }, true);
 </script>
 </body>
 </html>

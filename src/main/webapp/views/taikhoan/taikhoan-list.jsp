@@ -82,18 +82,18 @@
                             </a>
                             <c:choose>
                                 <c:when test="${acc.trangThai == 'HOAT_DONG'}">
-                                    <a href="${pageContext.request.contextPath}/taikhoan?action=toggleStatus&id=${acc.id}" class="btn btn-sm btn-outline-secondary py-0 px-2 text-warning" title="Khóa tài khoản" onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản này?');">
+                                    <a href="${pageContext.request.contextPath}/taikhoan?action=toggleStatus&id=${acc.id}" class="btn btn-sm btn-outline-secondary py-0 px-2 text-warning" title="Khóa tài khoản" data-confirm="Bạn có chắc chắn muốn khóa tài khoản '${acc.username}'?">
                                         <i class="ph ph-lock"></i>
                                     </a>
                                 </c:when>
                                 <c:otherwise>
-                                    <a href="${pageContext.request.contextPath}/taikhoan?action=toggleStatus&id=${acc.id}" class="btn btn-sm btn-outline-secondary py-0 px-2 text-success" title="Mở khóa">
+                                    <a href="${pageContext.request.contextPath}/taikhoan?action=toggleStatus&id=${acc.id}" class="btn btn-sm btn-outline-secondary py-0 px-2 text-success" title="Mở khóa" data-confirm="Bạn có chắc chắn muốn mở khóa tài khoản '${acc.username}'?">
                                         <i class="ph ph-lock-key-open"></i>
                                     </a>
                                 </c:otherwise>
                             </c:choose>
                             <c:if test="${acc.username != 'admin'}">
-                                <a href="${pageContext.request.contextPath}/taikhoan?action=delete&id=${acc.id}" class="btn btn-sm btn-outline-secondary py-0 px-2 text-danger" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa tài khoản này?');">
+                                <a href="${pageContext.request.contextPath}/taikhoan?action=delete&id=${acc.id}" class="btn btn-sm btn-outline-secondary py-0 px-2 text-danger" title="Xóa" data-confirm="Bạn có chắc muốn xóa vĩnh viễn tài khoản '${acc.username}'?">
                                     <i class="ph ph-trash"></i>
                                 </a>
                             </c:if>

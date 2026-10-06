@@ -75,7 +75,7 @@
                             <a href="${pageContext.request.contextPath}/khoanphi?action=edit&id=${kp.id}" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Chỉnh sửa">
                                 <i class="ph ph-pencil-simple"></i>
                             </a>
-                            <a href="${pageContext.request.contextPath}/khoanphi?action=delete&id=${kp.id}" class="btn btn-sm btn-outline-secondary py-0 px-2 text-danger" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa khoản phí này?');">
+                            <a href="${pageContext.request.contextPath}/khoanphi?action=delete&id=${kp.id}" class="btn btn-sm btn-outline-secondary py-0 px-2 text-danger" title="Xóa" data-confirm="Bạn có chắc chắn muốn xóa khoản phí '${kp.tenKhoanPhi}'?">
                                 <i class="ph ph-trash"></i>
                             </a>
                         </td>
