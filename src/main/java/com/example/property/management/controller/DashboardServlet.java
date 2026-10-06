@@ -58,7 +58,7 @@ public class DashboardServlet extends HttpServlet {
             request.setAttribute("svRoomName", hasRoom ? svRoomName : "Chưa xếp phòng");
             request.setAttribute("svHasRoom", hasRoom);
             request.setAttribute("svUnpaidCount", svUnpaidCount);
-            request.setAttribute("svDebt", svDebt != null ? svDebt : "0");
+            request.setAttribute("svDebt", formatMoney(svDebt));
             request.setAttribute("svUnreadNotify", svUnreadNotify);
             request.setAttribute("svPendingRepair", svPendingRepair);
         } else {
@@ -100,7 +100,7 @@ public class DashboardServlet extends HttpServlet {
         request.setAttribute("hopDongSapHetHan", hopDongSapHetHan);
         request.setAttribute("hoaDonChuaThanhToan", hoaDonChuaThanhToan);
         request.setAttribute("hoaDonQuaHan", hoaDonQuaHan);
-        request.setAttribute("tongCongNo", tongCongNo != null ? tongCongNo : "0");
+        request.setAttribute("tongCongNo", formatMoney(tongCongNo));
         request.setAttribute("yeuCauChoXuLy", yeuCauChoXuLy);
         request.setAttribute("dangKyChoDuyet", dangKyChoDuyet);
 
@@ -140,5 +140,17 @@ public class DashboardServlet extends HttpServlet {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private String formatMoney(String val) {
+        if (val == null || val.trim().isEmpty())
+            return "0";
+        try {
+            double d = Double.parseDouble(val);
+            long rounded = Math.round(d);
+            return String.format("%,d", rounded).replace(',', '.');
+        } catch (Exception e) {
+            return val.replaceAll("\\.0+$", "");
+        }
     }
 }

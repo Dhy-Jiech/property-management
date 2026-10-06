@@ -12,7 +12,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 
-@WebServlet(name = "KhoanPhiServlet", urlPatterns = { "/khoan-phi" })
+@WebServlet(name = "KhoanPhiServlet", urlPatterns = { "/khoanphi", "/khoan-phi" })
 public class KhoanPhiServlet extends HttpServlet {
 
     private KhoanPhiDAO khoanPhiDAO;
@@ -25,7 +25,7 @@ public class KhoanPhiServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Only ADMIN and QUAN_LY
+        // Allow all staff, managers, and admins
         if (!hasAccess(request)) {
             response.sendRedirect(request.getContextPath() + "/dashboard");
             return;
@@ -47,7 +47,7 @@ public class KhoanPhiServlet extends HttpServlet {
                     break;
                 case "delete":
                     khoanPhiDAO.delete(Integer.parseInt(request.getParameter("id")));
-                    response.sendRedirect(request.getContextPath() + "/khoan-phi?message=Deleted");
+                    response.sendRedirect(request.getContextPath() + "/khoanphi?message=Deleted");
                     break;
                 default:
                     request.setAttribute("khoanPhiList", khoanPhiDAO.findAll());
@@ -91,7 +91,7 @@ public class KhoanPhiServlet extends HttpServlet {
             } else {
                 khoanPhiDAO.insert(kp);
             }
-            response.sendRedirect(request.getContextPath() + "/khoan-phi?message=Saved");
+            response.sendRedirect(request.getContextPath() + "/khoanphi?message=Saved");
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Lỗi: " + e.getMessage());
@@ -107,6 +107,6 @@ public class KhoanPhiServlet extends HttpServlet {
         TaiKhoan user = (TaiKhoan) session.getAttribute("user");
         if (user == null)
             return false;
-        return user.getVaiTro() == VaiTro.ADMIN || user.getVaiTro() == VaiTro.QUAN_LY;
+        return user.getVaiTro() != VaiTro.SINH_VIEN;
     }
 }
