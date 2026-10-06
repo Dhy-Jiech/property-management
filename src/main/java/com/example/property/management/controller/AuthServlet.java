@@ -58,8 +58,16 @@ public class AuthServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         try {
-            TaiKhoan user = taiKhoanDAO.authenticate(username, password);
-            if (user != null) {
+            TaiKhoan user = taiKhoanDAO.findByUsername(username);
+            if (user != null && password.equals(user.getPasswordHash())) {
+                if (user.getTrangThai() != com.example.property.management.model.enums.TrangThaiTaiKhoan.HOAT_DONG) {
+                    request.setAttribute("errorMessage",
+                            "Tài khoản của bạn đã bị khóa! Vui lòng liên hệ Quản trị viên.");
+                    request.setAttribute("username", username);
+                    request.setAttribute("pageTitle", "Đăng Nhập");
+                    request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
+                    return;
+                }
                 HttpSession session = request.getSession(true);
                 session.setAttribute("user", user);
                 response.sendRedirect(request.getContextPath() + "/dashboard");

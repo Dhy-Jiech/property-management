@@ -64,14 +64,15 @@
                                 </td>
                                 <td class="text-end pe-3">
                                     <c:choose>
-                                        <c:when test="${h.trangThai != 'DA_THANH_TOAN'}">
+                                        <%-- Chỉ sinh viên mới thấy nút thanh toán --%>
+                                        <c:when test="${isSV and h.trangThai != 'DA_THANH_TOAN'}">
                                             <a href="${pageContext.request.contextPath}/hoadon?action=payDetail&id=${h.id}" class="btn btn-sm btn-outline-success">
-                                                <i class="fa-solid fa-credit-card me-1"></i>Thanh toán & Chi tiết
+                                                <i class="fa-solid fa-credit-card me-1"></i>Thanh toán
                                             </a>
                                         </c:when>
                                         <c:otherwise>
                                             <a href="${pageContext.request.contextPath}/hoadon?action=payDetail&id=${h.id}" class="btn btn-sm btn-outline-secondary">
-                                                <i class="fa-solid fa-eye me-1"></i>Lịch sử GD
+                                                <i class="fa-solid fa-eye me-1"></i>${isSV ? 'Lịch sử GD' : 'Chi tiết'}
                                             </a>
                                         </c:otherwise>
                                     </c:choose>

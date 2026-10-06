@@ -87,6 +87,24 @@ public class TaiKhoanServlet extends HttpServlet {
 
     private void listAccounts(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, SQLException {
+        String msg = request.getParameter("message");
+        if ("StatusToggled".equals(msg)) {
+            request.setAttribute("successMessage", "Thay đổi trạng thái tài khoản thành công!");
+        } else if ("Created".equals(msg)) {
+            request.setAttribute("successMessage", "Tạo tài khoản mới thành công!");
+        } else if ("Updated".equals(msg)) {
+            request.setAttribute("successMessage", "Cập nhật thông tin tài khoản thành công!");
+        } else if ("PasswordChanged".equals(msg)) {
+            request.setAttribute("successMessage", "Đổi mật khẩu tài khoản thành công!");
+        } else if ("Deleted".equals(msg)) {
+            request.setAttribute("successMessage", "Đã xóa tài khoản thành công!");
+        }
+
+        String errorMsg = request.getParameter("errorMessage");
+        if (errorMsg != null && !errorMsg.isBlank()) {
+            request.setAttribute("errorMessage", errorMsg);
+        }
+
         List<TaiKhoan> list = taiKhoanDAO.findAll();
         request.setAttribute("taiKhoanList", list);
         request.setAttribute("pageTitle", "Quản Lý Tài Khoản System");
@@ -173,8 +191,18 @@ public class TaiKhoanServlet extends HttpServlet {
     private void deleteAccount(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException, Exception {
         int id = Integer.parseInt(request.getParameter("id"));
-        taiKhoanDAO.delete(id);
-        response.sendRedirect(request.getContextPath() + "/taikhoan?message=Deleted");
+        try {
+            taiKhoanDAO.delete(id);
+            response.sendRedirect(request.getContextPath() + "/taikhoan?message=Deleted");
+        } catch (SQLException e) {
+            if (e.getErrorCode() == 1451 || (e.getSQLState() != null && e.getSQLState().startsWith("23"))) {
+                String err = "Tài khoản đang có dữ liệu liên kết trong hệ thống (hợp đồng, hóa đơn, thông báo...). Không thể xóa, vui lòng sử dụng chức năng Khóa tài khoản!";
+                response.sendRedirect(request.getContextPath() + "/taikhoan?errorMessage="
+                        + java.net.URLEncoder.encode(err, java.nio.charset.StandardCharsets.UTF_8));
+            } else {
+                throw e;
+            }
+        }
     }
-    
+
 }

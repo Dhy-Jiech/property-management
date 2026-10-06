@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS tai_khoan (
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     vai_tro ENUM('ADMIN', 'QUAN_LY', 'NHAN_VIEN', 'SINH_VIEN') NOT NULL DEFAULT 'SINH_VIEN',
-    trang_thai ENUM('HOAT_DONG', 'DA_KHOA') NOT NULL DEFAULT 'HOAT_DONG',
+    trang_thai VARCHAR(50) NOT NULL DEFAULT 'HOAT_DONG',
     sinh_vien_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -274,3 +274,12 @@ CREATE TABLE IF NOT EXISTS hoa_don_chi_tiet (
     thanh_tien DECIMAL(12,2) NOT NULL,
     FOREIGN KEY (hoa_don_id) REFERENCES hoa_don(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE thanh_toan
+  ADD COLUMN trang_thai ENUM('CHO_XAC_NHAN','DA_XAC_NHAN') NOT NULL DEFAULT 'DA_XAC_NHAN',
+  ADD COLUMN nguoi_gui_id bigINT NULL,
+  ADD COLUMN nguoi_gui VARCHAR(100) NULL;
+ALTER TABLE tai_khoan ADD COLUMN ho_ten VARCHAR(100) NULL;
+UPDATE tai_khoan SET ho_ten = 'Nguyễn Văn Quản Lý' WHERE username = 'quanly';
+UPDATE tai_khoan SET ho_ten = 'Trần Thị Nhân Viên' WHERE username = 'nhanvien';
+ALTER TABLE tai_khoan MODIFY COLUMN trang_thai VARCHAR(50) NOT NULL DEFAULT 'HOAT_DONG';

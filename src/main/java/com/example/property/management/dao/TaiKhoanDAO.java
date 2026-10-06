@@ -27,6 +27,12 @@ public class TaiKhoanDAO {
         };
 
         try (Connection conn = DBConnection.getConnection()) {
+            try (Statement alterStmt = conn.createStatement()) {
+                alterStmt.executeUpdate(
+                        "ALTER TABLE tai_khoan MODIFY COLUMN trang_thai VARCHAR(50) NOT NULL DEFAULT 'HOAT_DONG'");
+            } catch (SQLException ignored) {
+            }
+
             for (String[] acc : seedAccounts) {
                 try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
                     checkStmt.setString(1, acc[0]);
@@ -196,7 +202,11 @@ public class TaiKhoanDAO {
             try {
                 t.setTrangThai(TrangThaiTaiKhoan.valueOf(trangThaiStr));
             } catch (IllegalArgumentException e) {
-                t.setTrangThai(TrangThaiTaiKhoan.HOAT_DONG);
+                if ("BI_KHOA".equalsIgnoreCase(trangThaiStr) || "KHOA".equalsIgnoreCase(trangThaiStr)) {
+                    t.setTrangThai(TrangThaiTaiKhoan.DA_KHOA);
+                } else {
+                    t.setTrangThai(TrangThaiTaiKhoan.HOAT_DONG);
+                }
             }
         }
 
